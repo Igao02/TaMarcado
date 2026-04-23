@@ -1,0 +1,20 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: tamarcado_sql
+    environment:
+      SA_PASSWORD: "SqlServer123!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "14433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+
+  tamarcado.api:
+    image: ${DOCKER_REGISTRY-}tamarcadoapi
+    build:
+      context: .
+      dockerfile: TaMarcado.Api/Dockerfile
+
+volumes:
+  sql_data:

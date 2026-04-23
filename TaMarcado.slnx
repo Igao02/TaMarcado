@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/1 - Apresentacao/">
+    <Project Path="TaMarcado.Apresentacao/TaMarcado.Apresentacao.Client/TaMarcado.Apresentacao.Client.csproj" />
+    <Project Path="TaMarcado.Apresentacao/TaMarcado.Apresentacao/TaMarcado.Apresentacao.csproj" />
+  </Folder>
+  <Folder Name="/2 - Dominio &amp; Aplicacao/">
+    <Project Path="TaMarcado.Aplicacao/TaMarcado.Aplicacao.csproj" />
+    <Project Path="TaMarcado.Dominio/TaMarcado.Dominio.csproj" />
+  </Folder>
+  <Folder Name="/3 - Infraestrutura &amp; Compartilhado/">
+    <Project Path="TaMarcado.Compartilhado/TaMarcado.Compartilhado.csproj" />
+    <Project Path="TaMarcado.Infraestrutura/TaMarcado.Infraestrutura.csproj" />
+  </Folder>
+  <Folder Name="/4 - Api/">
+    <Project Path="TaMarcado.Api/TaMarcado.Api.csproj" />
+  </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+</Solution>
