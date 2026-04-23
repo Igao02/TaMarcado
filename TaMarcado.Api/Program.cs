@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TaMarcado.Api.Extensions;
 using TaMarcado.Infraestrutura.Data;
 using TaMarcado.Infraestrutura.Data.Migrations;
 
@@ -58,5 +59,7 @@ app.UseAuthorization();
 
 // Endpoints do Identity
 app.MapIdentityApi<ApplicationUser>();
+
+app.MapEndpoints();
 
 app.Run();

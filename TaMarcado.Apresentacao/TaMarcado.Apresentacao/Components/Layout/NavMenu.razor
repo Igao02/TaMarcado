@@ -1,10 +1,27 @@
-﻿
-<MudNavMenu>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-    <MudNavLink Href="counter" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Counter</MudNavLink>
-    
-    <MudNavLink Href="weather" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Weather</MudNavLink>
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
 
+<MudNavMenu>
+    <AuthorizeView>
+        <Authorized>
+            <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+            <MudNavLink Href="product/create" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.RocketLaunch">Criar Produto</MudNavLink>
+            <MudNavLink Icon="@Icons.Material.Filled.Logout" OnClick="Logout">Sair</MudNavLink>
+        </Authorized>
+        <NotAuthorized>
+            <MudNavLink Href="register" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">Cadastrar-se</MudNavLink>
+            <MudNavLink Href="login" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">Login</MudNavLink>
+        </NotAuthorized>
+    </AuthorizeView>
 </MudNavMenu>
+
+@code {
+    private async Task Logout()
+    {
+        await JS.InvokeAsync<bool>("logoutWithFetch");
+        Navigation.NavigateTo("/login", true);
+    }
+}
 
 
