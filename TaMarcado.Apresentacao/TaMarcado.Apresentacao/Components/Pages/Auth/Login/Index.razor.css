@@ -1,0 +1,72 @@
+﻿.login-page ::deep .login-card {
+    position: relative;
+    backdrop-filter: blur(0px);
+    transition: transform 0.25s ease, box-shadow 0.3s ease;
+    background: var(--mud-palette-surface);
+    border: 1px solid var(--mud-palette-lines-default);
+    animation: slideInLogin 0.6s ease-out; /* <-- animação no card */
+}
+
+    .login-page ::deep .login-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2);
+    }
+
+.login-page ::deep .card-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--mud-palette-primary), var(--mud-palette-secondary));
+    border-radius: 32px 32px 0 0;
+    /* remove a animação daqui se existir */
+}
+
+.login-page ::deep .opacity-70 {
+    opacity: 0.7;
+}
+
+/* Responsividade mobile */
+@media (max-width: 600px) {
+    .login-page ::deep .login-card {
+        margin: 16px;
+        border-radius: 28px;
+    }
+
+    .login-page ::deep .mud-card-content {
+        padding: 20px !important;
+    }
+}
+
+/* Efeitos nos campos (MudBlazor) */
+.login-page ::deep .mud-input-outlined .mud-input-label {
+    transition: all 0.2s;
+}
+
+.login-page ::deep .mud-input-outlined .mud-input-root:hover {
+    border-color: var(--mud-palette-primary) !important;
+}
+
+/* Botão com efeito sutil */
+.login-page ::deep .mud-button-filled {
+    transition: transform 0.15s, box-shadow 0.2s;
+}
+
+    .login-page ::deep .mud-button-filled:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+/* Animação de entrada do card */
+@keyframes slideInLogin {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

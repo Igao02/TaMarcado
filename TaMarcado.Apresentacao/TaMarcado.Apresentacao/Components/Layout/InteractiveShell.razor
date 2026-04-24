@@ -1,0 +1,21 @@
+@rendermode InteractiveServer
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+
+<MudSnackbarProvider />
+
+@code {
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        var uri = new Uri(Nav.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+        if (query["logado"] == "1")
+        {
+            Snackbar.Add("Bem-vindo(a)! Login realizado com sucesso.", Severity.Success);
+            Nav.NavigateTo("/", replace: true);
+        }
+    }
+}

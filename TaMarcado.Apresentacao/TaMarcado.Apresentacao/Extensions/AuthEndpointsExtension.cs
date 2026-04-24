@@ -32,7 +32,7 @@ public static class AuthEndpointsExtension
                 var principal = new ClaimsPrincipal(identity);
 
                 await context.SignInAsync("Identity.Application", principal);
-                context.Response.Redirect("/");
+                context.Response.Redirect("/?logado=1");
             }
             else
             {

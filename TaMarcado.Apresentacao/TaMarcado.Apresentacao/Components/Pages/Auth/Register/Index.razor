@@ -4,60 +4,109 @@
 
 <PageTitle>Cadastro — TaMarcado</PageTitle>
 
-<MudGrid Justify="Justify.Center" Style="min-height:100vh;align-items:center">
-    <MudItem xs="12" sm="8" md="5" lg="4">
-        <MudCard Elevation="4">
-            <MudCardContent Class="pa-8">
-                <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-6">Criar conta</MudText>
+<div class="register-page">
+    <MudGrid Justify="Justify.Center" Style="min-height: 100vh; align-items: center; background: var(--mud-palette-background);">
+        <MudItem xs="12" sm="8" md="6" lg="5">
+            <MudPaper Class="register-card" Elevation="0" Style="border-radius: 32px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;" Outlined="true">
+                <div class="card-gradient"></div>
+                <MudCardContent Class="pa-6 pa-sm-8">
+                    <div class="text-center mb-6">
+                        <MudIcon Icon="@Icons.Material.Filled.Event" Size="Size.Large" Color="Color.Primary" Class="mb-2" />
+                        <MudText Typo="Typo.h4" Class="font-weight-bold" Style="background: linear-gradient(135deg, var(--mud-palette-primary), var(--mud-palette-secondary)); color: transparent;">
+                            Criar conta
+                        </MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Inherit" Class="mt-2 opacity-70">
+                            Comece a gerenciar seus agendamentos
+                        </MudText>
+                    </div>
 
-                @if (erro is not null)
-                {
-                    <MudAlert Severity="Severity.Error" Class="mb-4">@erro</MudAlert>
-                }
+                    @if (errorMessage is not null)
+                    {
+                        <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="mb-4 rounded-xl" Dense="false" Icon="@Icons.Material.Filled.ErrorOutline">
+                            @errorMessage
+                        </MudAlert>
+                    }
 
-                <EditForm Model="model" OnValidSubmit="Registrar">
-                    <DataAnnotationsValidator />
+                    <EditForm Model="model" OnValidSubmit="HandleRegister">
+                        <DataAnnotationsValidator />
 
-                    <MudTextField @bind-Value="model.Email"
-                                  Label="E-mail"
-                                  InputType="InputType.Email"
-                                  Variant="Variant.Outlined"
-                                  FullWidth="true"
-                                  Class="mb-4"
-                                  For="@(() => model.Email)" />
+                        <MudTextField @bind-Value="model.Email"
+                                      Label="E-mail"
+                                      InputType="InputType.Email"
+                                      Variant="Variant.Outlined"
+                                      FullWidth="true"
+                                      Class="mb-4"
+                                      For="@(() => model.Email)"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Email"
+                                      AdornmentColor="Color.Primary" />
 
-                    <MudTextField @bind-Value="model.Password"
-                                  Label="Senha"
-                                  InputType="InputType.Password"
-                                  Variant="Variant.Outlined"
-                                  FullWidth="true"
-                                  Class="mb-4"
-                                  For="@(() => model.Password)" />
+                        <MudTextField @bind-Value="model.Password"
+                                      Label="Senha"
+                                      InputType="@(showPassword ? InputType.Text : InputType.Password)"
+                                      Variant="Variant.Outlined"
+                                      FullWidth="true"
+                                      Class="mb-4"
+                                      For="@(() => model.Password)"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@(showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                      OnAdornmentClick="() => showPassword = !showPassword"
+                                      AdornmentColor="Color.Default" />
 
-                    <MudCheckBox @bind-Value="model.AceitoTermos"
-                                 Label="Aceito os termos de uso"
-                                 Class="mb-6"
-                                 For="@(() => model.AceitoTermos)" />
+                        <MudTextField @bind-Value="confirmPassword"
+                                      Label="Confirmar senha"
+                                      InputType="@(showConfirmPassword ? InputType.Text : InputType.Password)"
+                                      Variant="Variant.Outlined"
+                                      FullWidth="true"
+                                      Class="mb-4"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@(showConfirmPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                      OnAdornmentClick="() => showConfirmPassword = !showConfirmPassword"
+                                      AdornmentColor="Color.Default" />
 
-                    <MudButton ButtonType="ButtonType.Submit"
-                               Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               FullWidth="true"
-                               Size="Size.Large"
-                               Disabled="isLoading">
-                        @if (isLoading)
-                        {
-                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
-                        }
-                        Cadastrar
-                    </MudButton>
-                </EditForm>
+                        <div class="d-flex align-center justify-space-between flex-wrap gap-2 mb-6">
+                            <MudCheckBox @bind-Value="model.AceitoTermos"
+                                         Label=""
+                                         For="@(() => model.AceitoTermos)"
+                                         Size="Size.Small" />
+                            <MudText Typo="Typo.body2">
+                                Aceito os <MudLink Href="/termos" Target="_blank">termos de uso</MudLink> e <MudLink Href="/privacidade" Target="_blank">política de privacidade</MudLink>
+                            </MudText>
+                        </div>
 
-                <MudText Align="Align.Center" Class="mt-4">
-                    Já tem conta?
-                    <MudLink Href="/login">Entrar</MudLink>
-                </MudText>
-            </MudCardContent>
-        </MudCard>
-    </MudItem>
-</MudGrid>
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   FullWidth="true"
+                                   Size="Size.Large"
+                                   Disabled="isLoading"
+                                   Class="rounded-pill text-capitalize font-weight-bold"
+                                   Style="height: 48px;">
+                            @if (isLoading)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" Color="Color.Inherit" />
+                            }
+                            Cadastrar
+                        </MudButton>
+                    </EditForm>
+
+                    <MudDivider Class="my-6" />
+
+                    <div class="text-center">
+                        <MudText Typo="Typo.body2" Align="Align.Center">
+                            Já tem uma conta?
+                            <MudLink Href="/login" Style="font-weight: 600; text-decoration: none;">Entrar agora</MudLink>
+                        </MudText>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Inherit" Style="opacity: 0.6;">
+                            Ao se cadastrar, você concorda com nossos termos
+                        </MudText>
+                    </div>
+                </MudCardContent>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</div>
+

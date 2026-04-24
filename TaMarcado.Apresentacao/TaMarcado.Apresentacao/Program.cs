@@ -20,6 +20,9 @@ builder.Services.AddAuthentication("Identity.Application")
         options.Cookie.SameSite = SameSiteMode.Strict;
     });
 
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
+
 builder.Services.AddHttpClient("ApiBack", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["ApiUrl"] ?? "https://localhost:7034");

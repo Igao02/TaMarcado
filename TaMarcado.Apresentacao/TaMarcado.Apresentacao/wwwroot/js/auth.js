@@ -12,6 +12,15 @@ window.loginWithFetch = async function (email, password) {
     }
 };
 
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('form[action="/auth/login"]');
+    if (!form) return;
+    form.addEventListener('submit', function () {
+        const btn = form.querySelector('button[type="submit"]');
+        if (btn) btn.disabled = true;
+    });
+});
+
 window.logoutWithFetch = async function () {
     try {
         const response = await fetch('/auth/logout', {
