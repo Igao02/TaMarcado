@@ -13,9 +13,6 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["TaMarcado.Api/TaMarcado.Api.csproj", "TaMarcado.Api/"]
-COPY ["TaMarcado.Aplicacao/TaMarcado.Aplicacao.csproj", "TaMarcado.Aplicacao/"]
-COPY ["TaMarcado.Dominio/TaMarcado.Dominio.csproj", "TaMarcado.Dominio/"]
-COPY ["TaMarcado.DominioPrincipal/TaMarcado.DominioPrincipal.csproj", "TaMarcado.DominioPrincipal/"]
 COPY ["TaMarcado.Compartilhado/TaMarcado.Compartilhado.csproj", "TaMarcado.Compartilhado/"]
 COPY ["TaMarcado.Infraestrutura/TaMarcado.Infraestrutura.csproj", "TaMarcado.Infraestrutura/"]
 RUN dotnet restore "./TaMarcado.Api/TaMarcado.Api.csproj"

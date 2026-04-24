@@ -111,6 +111,83 @@ Clean Architecture separado em camadas com os seguintes projetos:
 | `TaMarcado.Compartilhado` | Tipos e utilitários compartilhados entre camadas |
 | `TaMarcado.Apresentacao` | Blazor Server (host, net10) + Blazor WebAssembly Client (net9, MudBlazor) |
 
+## Fluxo Front → Back
+
+Toda funcionalidade segue este fluxo obrigatório. Nunca pular camadas.
+
+```
+Blazor Page (.razor + .razor.cs)
+  → Handler BFF  [Apresentacao/Handlers/<Feature>/]
+    → HTTP (IHttpClientFactory, client "ApiBack")
+      → IEndpoint  [Api/Endpoints/<Feature>/]
+        → UseCase Handler  [Aplicacao/UseCases/<Feature>/<Action>/]
+          → IRepository  [Dominio/Repositories/]
+            → Repository impl  [Infraestrutura/Repositories/]
+              → ApplicationDbContext (EF Core)
+```
+
+### Convenções por camada
+
+**Blazor Page**
+- Rota, rendermode e `@inherits PageBase` no `.razor`
+- Toda lógica no code-behind `.razor.cs` herdando `ComponentBase`
+- Sempre usar `when (ex is not NavigationException)` em catches que contenham `Nav.NavigateTo`
+- `[CascadingParameter] Task<AuthenticationState>` para obter email do usuário logado
+
+**Handler BFF** (`TaMarcado.Apresentacao/Handlers/<Feature>/`)
+- Injeta `IHttpClientFactory`, usa client `"ApiBack"`
+- Contém os models do formulário com DataAnnotations
+- Retorna `Result { Success, Error }` ou `Result<T> { Success, Data, Error }`
+- Nunca acessa banco diretamente
+
+**IEndpoint** (`TaMarcado.Api/Endpoints/<Feature>/`)
+- Implementa `IEndpoint` — registrado automaticamente via reflection
+- Resolve `userId` via `UserManager.FindByEmailAsync` (o cookie só traz email)
+- Resolve `professionalId` via `IProfessionalRepository.GetIdByUserIdAsync` quando necessário
+- Chama o UseCase Handler e retorna `result.Match(onSuccess, onFailure)`
+
+**UseCase** (`TaMarcado.Aplicacao/UseCases/<Feature>/<Action>/`)
+- Três arquivos: `Command.cs` (record), `Handler.cs` (class), `Response.cs` (record)
+- Namespace plural para evitar colisão com entidades: `UseCases.Professionals.*`, `UseCases.Services.*`
+- Handler injeta apenas `IRepository` interfaces — nunca `ApplicationDbContext` diretamente
+- Retorna `Result<TResponse>` do `TaMarcado.Compartilhado`
+- Sempre envolve o corpo em try/catch retornando `Error.Problem` em caso de exceção
+
+**IRepository** (`TaMarcado.Dominio/Repositories/`)
+- Interface pura, sem dependência de infraestrutura
+- Métodos retornam entidades do domínio ou tipos primitivos (nunca DTOs)
+
+**Repository** (`TaMarcado.Infraestrutura/Repositories/`)
+- Implementa a interface do domínio
+- Injeta `ApplicationDbContext`
+- Chama `SaveChangesAsync()` após operações de escrita
+
+### Referências entre projetos
+```
+Apresentacao → (sem referência direta à API ou Domínio)
+Api          → Aplicacao, Infraestrutura, Dominio, Compartilhado
+Aplicacao    → Dominio, Compartilhado  (nunca Infraestrutura)
+Infraestrutura → Dominio
+Dominio      → DominioPrincipal
+```
+
+### Padrão Result
+```csharp
+// Sucesso
+Result.Success(new MinhaResponse(...))
+// Falha de negócio
+Result.Failure<T>(Error.Conflict("Entidade.Codigo", "Mensagem"))
+Result.Failure<T>(Error.NotFound("Entidade.Codigo", "Mensagem"))
+// Exceção inesperada
+Result.Failure<T>(Error.Problem("Entidade.Acao", ex.Message))
+```
+
+### Providers MudBlazor obrigatórios
+`InteractiveShell.razor` deve conter `<MudSnackbarProvider />` e `<MudDialogProvider />`.
+Sem o provider, Snackbar/Dialog não funcionam mesmo que o componente esteja no markup.
+
+---
+
 ## Pontos importantes
 
 - **Registro de serviços no `Program.cs`:** Todo `builder.Services.*` deve estar **antes** de `builder.Build()`. Colocar depois faz o container de DI ignorar o registro e quebra o EF em design time.
