@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TaMarcado.Infraestrutura.Data.Migrations;
+using TaMarcado.Infraestrutura.Data;
 
 #nullable disable
 

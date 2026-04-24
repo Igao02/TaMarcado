@@ -20,6 +20,56 @@ automáticas via WhatsApp, reduzindo faltas e eliminando a gestão manual de age
 - Painel de agenda do profissional
 - Pagamento via PIX integrado ao agendamento
 
+## Modelo de Domínio
+
+### Decisões de design
+- **Profissional solo:** um login = um profissional. O campo `NomeExibicao` pode ser o nome pessoal ou da empresa — não há multi-usuário por conta.
+- **Clientes por profissional:** cada profissional tem sua própria cartela de clientes (sem compartilhamento entre contas).
+- **PIX manual:** o profissional cadastra sua chave PIX. O sistema gera o payload "Copia e Cola" e QR Code estático com o valor do serviço. Confirmação de pagamento é manual — o profissional marca como pago e pode anexar comprovante (imagem/PDF).
+
+### Tabelas
+
+| Tabela | Campos principais |
+|---|---|
+| `AspNetUsers` | Identity padrão (já existe) |
+| `Categorias` | Id (int), Nome |
+| `Profissionais` | Id, UserId (FK 1:1), CategoriaId (FK), NomeExibicao, Slug (unique), WhatsApp, Bio?, FotoUrl?, ChavePix?, TipoChavePix? (enum), Ativo, CriadoEm |
+| `Servicos` | Id, ProfissionalId (FK), Nome, Descricao?, DuracaoMinutos, Preco, Ativo, CriadoEm |
+| `HorariosDisponiveis` | Id, ProfissionalId (FK), DiaSemana (enum), HoraInicio, HoraFim, Ativo |
+| `Bloqueios` | Id, ProfissionalId (FK), DataInicio, DataFim, Motivo? |
+| `Clientes` | Id, ProfissionalId (FK), Nome, Telefone, Email?, Observacoes?, CriadoEm |
+| `Agendamentos` | Id, ProfissionalId (FK), ServicoId (FK), ClienteId (FK), DataHoraInicio, DataHoraFim, Status (enum), ValorCobrado (snapshot), Observacoes?, CriadoEm |
+| `Pagamentos` | Id, AgendamentoId (FK 1:1), StatusPagamento (enum), ComprovanteUrl?, DataConfirmacao?, CriadoEm |
+| `NotificacoesAgendadas` | Id, AgendamentoId (FK), Tipo (enum), Status (enum), DataAgendada, DataEnvio?, Tentativas |
+| `Planos` | Id (int), Nome, LimiteAgendamentosMensal (int? — null=ilimitado), Preco |
+| `Assinaturas` | Id, ProfissionalId (FK), PlanoId (FK), Status (enum), DataInicio, DataFim?, CriadoEm |
+
+**Enums relevantes:**
+- `TipoChavePix`: CPF, CNPJ, Email, Telefone, Aleatoria
+- `DiaSemana`: Segunda…Domingo
+- `StatusAgendamento`: Pendente, Confirmado, Cancelado, Concluido
+- `StatusPagamento`: Pendente, Pago, Isento
+- `TipoNotificacao`: Confirmacao, Lembrete24h, Lembrete1h
+- `StatusNotificacao`: Pendente, Enviado, Falhou
+- `StatusAssinatura`: Ativa, Cancelada, Expirada
+
+### Relações
+```
+AspNetUsers   1──1 Profissionais
+Categorias    1──N Profissionais
+Profissionais 1──N Servicos
+Profissionais 1──N HorariosDisponiveis
+Profissionais 1──N Bloqueios
+Profissionais 1──N Clientes
+Profissionais 1──N Agendamentos
+Servicos      1──N Agendamentos
+Clientes      1──N Agendamentos
+Agendamentos  1──1 Pagamentos
+Agendamentos  1──N NotificacoesAgendadas
+Profissionais 1──N Assinaturas
+Planos        1──N Assinaturas
+```
+
 ## Commands
 
 ```bash

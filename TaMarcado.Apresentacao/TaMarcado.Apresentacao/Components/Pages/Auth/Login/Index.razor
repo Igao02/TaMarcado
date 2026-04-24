@@ -1,0 +1,101 @@
+@page "/login"
+
+<PageTitle>Entrar — TaMarcado</PageTitle>
+
+<div class="login-page">
+    <MudGrid Justify="Justify.Center" Style="min-height: 100vh; align-items: center; background: var(--mud-palette-background);">
+        <MudItem xs="12" sm="8" md="6" lg="5">
+            <MudPaper Class="login-card" Elevation="0" Style="border-radius: 32px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;" Outlined="true">
+                <div class="card-gradient"></div>
+                <MudCardContent Class="pa-6 pa-sm-8">
+                    <div class="text-center mb-6">
+                        <MudIcon Icon="@Icons.Material.Filled.Login" Size="Size.Large" Color="Color.Primary" Class="mb-2" />
+                        <MudText Typo="Typo.h4" Class="font-weight-bold" Style="background: linear-gradient(135deg, var(--mud-palette-primary), var(--mud-palette-secondary)); color: transparent;">
+                            Boas-vindas
+                        </MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Inherit" Class="mt-2 opacity-70">
+                            Acesse sua conta para gerenciar seus agendamentos
+                        </MudText>
+                    </div>
+
+                    @if (CadastroParam == "1")
+                    {
+                        <MudAlert Severity="Severity.Success" Variant="Variant.Filled" Class="mb-4 rounded-xl" Dense="false" Icon="@Icons.Material.Filled.CheckCircle">
+                            Conta criada com sucesso! Faça login para continuar.
+                        </MudAlert>
+                    }
+
+                    @if (ErroParam == "1")
+                    {
+                        <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="mb-4 rounded-xl" Dense="false" Icon="@Icons.Material.Filled.ErrorOutline">
+                            E-mail ou senha inválidos.
+                        </MudAlert>
+                    }
+
+                    <form method="post" action="/auth/login">
+                        <MudTextField T="string"
+                                      Name="email"
+                                      Label="E-mail"
+                                      InputType="InputType.Email"
+                                      Variant="Variant.Outlined"
+                                      FullWidth="true"
+                                      Class="mb-4"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Email"
+                                      AdornmentColor="Color.Primary" />
+
+                        <MudTextField T="string"
+                                      Name="password"
+                                      Label="Senha"
+                                      InputType="InputType.Password"
+                                      Variant="Variant.Outlined"
+                                      FullWidth="true"
+                                      Class="mb-4"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Lock"
+                                      AdornmentColor="Color.Primary" />
+
+                        <div class="d-flex justify-end mb-6">
+                            <MudLink Href="/esqueci-senha" Typo="Typo.body2" Style="text-decoration: none; font-weight: 500;">
+                                Esqueceu a senha?
+                            </MudLink>
+                        </div>
+
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   FullWidth="true"
+                                   Size="Size.Large"
+                                   Class="rounded-pill text-capitalize font-weight-bold"
+                                   Style="height: 48px;">
+                            Entrar
+                        </MudButton>
+                    </form>
+
+                    <MudDivider Class="my-6" />
+
+                    <div class="text-center">
+                        <MudText Typo="Typo.body2" Align="Align.Center">
+                            Não tem uma conta?
+                            <MudLink Href="/register" Style="font-weight: 600; text-decoration: none;">Criar conta gratuitamente</MudLink>
+                        </MudText>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Inherit" Style="opacity: 0.6;">
+                            Ao fazer login, você aceita nossos termos de uso
+                        </MudText>
+                    </div>
+                </MudCardContent>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "erro")]
+    private string? ErroParam { get; set; }
+
+    [SupplyParameterFromQuery(Name = "cadastro")]
+    private string? CadastroParam { get; set; }
+}

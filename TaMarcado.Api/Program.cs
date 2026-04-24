@@ -1,6 +1,14 @@
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+using TaMarcado.Api.Extensions;
+using TaMarcado.Aplicacao.UseCases.Professionals.CreateProfessional;
+using TaMarcado.Aplicacao.UseCases.Professionals.GetProfessional;
+using TaMarcado.Aplicacao.UseCases.Category.GetCategories;
+using TaMarcado.Aplicacao.UseCases.Services.CreateService;
+using TaMarcado.Aplicacao.UseCases.Services.GetServices;
+using TaMarcado.Dominio.Repositories;
+using TaMarcado.Infraestrutura.Repositories;
 using TaMarcado.Infraestrutura.Data;
-using TaMarcado.Infraestrutura.Data.Migrations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +45,15 @@ builder.Services
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddAuthorization();
+builder.Services.AddScoped<IProfessionalRepository, ProfessionalRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
+builder.Services.AddScoped<CreateProfessionalHandler>();
+builder.Services.AddScoped<GetProfessionalHandler>();
+builder.Services.AddScoped<GetCategoriesHandler>();
+builder.Services.AddScoped<CreateServiceHandler>();
+builder.Services.AddScoped<GetServicesHandler>();
+builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 
 var app = builder.Build();
 
@@ -58,5 +75,7 @@ app.UseAuthorization();
 
 // Endpoints do Identity
 app.MapIdentityApi<ApplicationUser>();
+
+app.MapEndpoints();
 
 app.Run();

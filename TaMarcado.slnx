@@ -6,6 +6,7 @@
   <Folder Name="/2 - Dominio &amp; Aplicacao/">
     <Project Path="TaMarcado.Aplicacao/TaMarcado.Aplicacao.csproj" />
     <Project Path="TaMarcado.Dominio/TaMarcado.Dominio.csproj" />
+    <Project Path="TaMarcado.DominioPrincipal/TaMarcado.DominioPrincipal.csproj" Id="62c7f6bf-0dc9-4339-b112-58e963a71170" />
   </Folder>
   <Folder Name="/3 - Infraestrutura &amp; Compartilhado/">
     <Project Path="TaMarcado.Compartilhado/TaMarcado.Compartilhado.csproj" />

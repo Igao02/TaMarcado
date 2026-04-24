@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TaMarcado.Aplicacao\TaMarcado.Aplicacao.csproj" />
     <ProjectReference Include="..\TaMarcado.Compartilhado\TaMarcado.Compartilhado.csproj" />
     <ProjectReference Include="..\TaMarcado.Infraestrutura\TaMarcado.Infraestrutura.csproj" />
   </ItemGroup>

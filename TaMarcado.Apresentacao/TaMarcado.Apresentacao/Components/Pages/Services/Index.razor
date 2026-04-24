@@ -1,0 +1,127 @@
+@page "/servicos"
+@rendermode InteractiveServer
+@inherits ServicesPageBase
+@attribute [Authorize]
+
+<PageTitle>Serviços — TaMarcado</PageTitle>
+
+<div class="d-flex align-center justify-space-between mb-6">
+    <MudText Typo="Typo.h5" Class="font-weight-bold">Meus Serviços</MudText>
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.Add"
+               OnClick="OpenCreateDialog"
+               Class="rounded-pill">
+        Novo serviço
+    </MudButton>
+</div>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="mb-4 rounded-xl" Dense="true">
+        @errorMessage
+    </MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-4" />
+}
+else if (services.Count == 0)
+{
+    <MudPaper Class="pa-8" Elevation="1" Style="border-radius: 16px; text-align: center;">
+        <MudIcon Icon="@Icons.Material.Filled.ContentCut" Size="Size.Large" Color="Color.Secondary" Class="mb-3" />
+        <MudText Typo="Typo.h6" Color="Color.Secondary">Nenhum serviço cadastrado</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">Clique em "Novo serviço" para começar</MudText>
+    </MudPaper>
+}
+else
+{
+    <MudGrid>
+        @foreach (var service in services)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <MudPaper Class="pa-5" Elevation="1" Style="border-radius: 16px;">
+                    <div class="d-flex align-center justify-space-between mb-2">
+                        <MudText Typo="Typo.h6" Class="font-weight-bold">@service.Name</MudText>
+                        <MudChip T="string" Color="@(service.IsActive ? Color.Success : Color.Default)" Size="Size.Small">
+                            @(service.IsActive ? "Ativo" : "Inativo")
+                        </MudChip>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(service.Description))
+                    {
+                        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">@service.Description</MudText>
+                    }
+                    <div class="d-flex gap-3">
+                        <div class="d-flex align-center gap-1">
+                            <MudIcon Icon="@Icons.Material.Filled.AccessTime" Size="Size.Small" Color="Color.Secondary" />
+                            <MudText Typo="Typo.body2">@service.DurationInMinutes min</MudText>
+                        </div>
+                        <div class="d-flex align-center gap-1">
+                            <MudIcon Icon="@Icons.Material.Filled.AttachMoney" Size="Size.Small" Color="Color.Secondary" />
+                            <MudText Typo="Typo.body2">R$ @service.Price.ToString("N2")</MudText>
+                        </div>
+                    </div>
+                </MudPaper>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+<MudDialog @bind-Visible="dialogOpen" Options="dialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Novo serviço</MudText>
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model="model" OnValidSubmit="HandleCreate">
+            <DataAnnotationsValidator />
+
+            <MudTextField @bind-Value="model.Name"
+                          Label="Nome do serviço"
+                          Variant="Variant.Outlined"
+                          FullWidth="true"
+                          Class="mb-4"
+                          For="@(() => model.Name)" />
+
+            <MudTextField @bind-Value="model.Description"
+                          Label="Descrição (opcional)"
+                          Variant="Variant.Outlined"
+                          FullWidth="true"
+                          Lines="2"
+                          Class="mb-4"
+                          For="@(() => model.Description)" />
+
+            <MudNumericField @bind-Value="model.DurationInMinutes"
+                             Label="Duração (minutos)"
+                             Variant="Variant.Outlined"
+                             FullWidth="true"
+                             Class="mb-4"
+                             Min="5" Max="480"
+                             For="@(() => model.DurationInMinutes)" />
+
+            <MudNumericField @bind-Value="model.Price"
+                             Label="Preço (R$)"
+                             Variant="Variant.Outlined"
+                             FullWidth="true"
+                             Class="mb-2"
+                             Min="0.01M"
+                             Format="N2"
+                             For="@(() => model.Price)" />
+
+            <div class="d-flex justify-end gap-2 mt-4">
+                <MudButton Variant="Variant.Text" OnClick="CloseDialog" Disabled="isSaving">Cancelar</MudButton>
+                <MudButton ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Disabled="isSaving"
+                           Class="rounded-pill">
+                    @if (isSaving)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" Color="Color.Inherit" />
+                    }
+                    Salvar
+                </MudButton>
+            </div>
+        </EditForm>
+    </DialogContent>
+</MudDialog>

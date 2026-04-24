@@ -1,0 +1,46 @@
+@page "/dashboard"
+@rendermode InteractiveServer
+@inherits DashboardPageBase
+@attribute [Authorize]
+
+<PageTitle>Painel — TaMarcado</PageTitle>
+
+@if (isLoading)
+{
+    <MudGrid Justify="Justify.Center" Style="min-height: 100vh; align-items: center;">
+        <MudItem xs="12" Style="text-align: center;">
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
+        </MudItem>
+    </MudGrid>
+}
+else if (profile is not null)
+{
+    <MudText Typo="Typo.h5" Class="mb-6 font-weight-bold">Olá, @profile.ExibitionName!</MudText>
+
+    <MudGrid>
+        <MudItem xs="12" sm="4">
+            <MudPaper Class="pa-6" Elevation="1" Style="border-radius: 16px; text-align: center;">
+                <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Color="Color.Primary" Size="Size.Large" Class="mb-2" />
+                <MudText Typo="Typo.h6" Class="font-weight-bold">Agendamentos</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">Em breve</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="4">
+            <MudPaper Class="pa-6" Elevation="1" Style="border-radius: 16px; text-align: center; cursor: pointer;"
+                      @onclick="@(() => Nav.NavigateTo("/servicos"))">
+                <MudIcon Icon="@Icons.Material.Filled.ContentCut" Color="Color.Primary" Size="Size.Large" Class="mb-2" />
+                <MudText Typo="Typo.h6" Class="font-weight-bold">Serviços</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">Gerenciar</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="4">
+            <MudPaper Class="pa-6" Elevation="1" Style="border-radius: 16px; text-align: center;">
+                <MudIcon Icon="@Icons.Material.Filled.AccessTime" Color="Color.Primary" Size="Size.Large" Class="mb-2" />
+                <MudText Typo="Typo.h6" Class="font-weight-bold">Horários</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">Em breve</MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}

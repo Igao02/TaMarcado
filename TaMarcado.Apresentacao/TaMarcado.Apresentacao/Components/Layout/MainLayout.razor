@@ -1,11 +1,22 @@
 ﻿@inherits LayoutComponentBase
 
+<InteractiveShell />
+<MudPopoverProvider />
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
+        <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                       Color="Color.Inherit"
+                       Edge="Edge.Start"
+                       OnClick="DrawerToggle" />
+
+        <MudText Typo="Typo.h5" Class="ml-3">Ta Marcado</MudText>
     </MudAppBar>
-    <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+    <MudDrawer @bind-Open="_drawerOpen"
+               Variant="DrawerVariant.Mini"
+               ClipMode="DrawerClipMode.Always"
+               Breakpoint="Breakpoint.Md"
+               Elevation="1">
         <NavMenu />
     </MudDrawer>
     <MudMainContent Class="pt-16 pa-4">
