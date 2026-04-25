@@ -5,6 +5,7 @@ using TaMarcado.Apresentacao.Extensions;
 using TaMarcado.Apresentacao.Handlers.Auth;
 using TaMarcado.Apresentacao.Handlers.Professional;
 using TaMarcado.Apresentacao.Handlers.Service;
+using TaMarcado.Apresentacao.Handlers.AvaliableTime;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,7 @@ builder.Services.AddHttpClient("ApiBack", client =>
 builder.Services.AddScoped<AuthHandler>();
 builder.Services.AddScoped<ProfessionalHandler>();
 builder.Services.AddScoped<ServiceHandler>();
+builder.Services.AddScoped<AvaliableTimeHandler>();
 
 var app = builder.Build();
 

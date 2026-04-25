@@ -1,0 +1,56 @@
+@inherits HorarioFormDialogBase
+
+<MudDialog @bind-Visible="Visible" Options="_dialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Novo horário</MudText>
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model="_model" OnValidSubmit="HandleSave">
+            <DataAnnotationsValidator />
+
+            <MudSelect T="int"
+                       MultiSelection="true"
+                       SelectedValues="_model.WeekDays"
+                       SelectedValuesChanged="@((IEnumerable<int> vals) => _model.WeekDays = vals)"
+                       Label="Dias da semana"
+                       Variant="Variant.Outlined"
+                       FullWidth="true"
+                       Class="mb-4"
+                       MultiSelectionTextFunc="@(items => items.Count() == 7 ? "Todos os dias" : $"{items.Count()} dia(s) selecionado(s)")">
+                @foreach (var day in AvaliableTimeHandler.WeekDays)
+                {
+                    <MudSelectItem T="int" Value="@day.Value">@day.Label</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudTimePicker @bind-Time="_model.StartTime"
+                           Label="Horário de início"
+                           Variant="Variant.Outlined"
+                           Class="mb-4 w-100"
+                           AmPm="false"
+                           For="@(() => _model.StartTime)" />
+
+            <MudTimePicker @bind-Time="_model.EndTime"
+                           Label="Horário de fim"
+                           Variant="Variant.Outlined"
+                           Class="mb-2 w-100"
+                           AmPm="false"
+                           For="@(() => _model.EndTime)" />
+
+            <div class="d-flex justify-end gap-2 mt-4">
+                <MudButton Variant="Variant.Text" OnClick="HandleCancel" Disabled="_isSaving">Cancelar</MudButton>
+                <MudButton ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Disabled="_isSaving"
+                           Class="rounded-pill">
+                    @if (_isSaving)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" Color="Color.Inherit" />
+                    }
+                    Salvar
+                </MudButton>
+            </div>
+        </EditForm>
+    </DialogContent>
+</MudDialog>

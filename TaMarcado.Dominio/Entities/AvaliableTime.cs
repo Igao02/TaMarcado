@@ -16,7 +16,7 @@ public class AvaliableTime : Entity
     public TimeSpan EndTime { get; set; }
     public bool Active { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
-    public virtual required Professional Professional { get; set; }
+    public virtual Professional? Professional { get; set; }
 
     public AvaliableTime(Guid professionalId, WeekEnum weekDay, TimeSpan startTime, TimeSpan endTime, bool active, DateTime createdAt)
     {

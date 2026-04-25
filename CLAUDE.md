@@ -126,6 +126,76 @@ Blazor Page (.razor + .razor.cs)
               → ApplicationDbContext (EF Core)
 ```
 
+### Nomenclatura de pastas e arquivos
+
+- **Todas as pastas** devem usar nomes em inglês — inclusive as do frontend (`Components/`, `Handlers/`, `Pages/`, nunca `Componentes/`, `Manipuladores/`, `Paginas/`).
+- **Páginas Blazor** usam `Index.razor` por padrão. Só use nome descritivo quando a mesma feature tiver múltiplas páginas distintas (ex: `Create.razor`, `Details.razor`) — sempre em inglês.
+- **Componentes filhos** ficam em `Components/` dentro da pasta da feature e também recebem nomes em inglês (ex: `ServiceFormDialog.razor`, `ScheduleTable.razor`).
+
+---
+
+### Validações no back-end
+
+**Todo use case que lê ou escreve no banco deve validar os inputs antes de tentar a operação**, retornando erros descritivos via `Result.Failure` com mensagens que ajudem a identificar o problema:
+
+```csharp
+// Valide primeiro, persista depois
+if (command.EndTime <= command.StartTime)
+    return Result.Failure<T>(Error.Conflict("Entity.InvalidRange", "Mensagem clara."));
+
+var existing = await repository.GetByXxxAsync(...);
+if (existing is not null)
+    return Result.Failure<T>(Error.Conflict("Entity.AlreadyExists", "Mensagem clara."));
+```
+
+**O BFF deve sempre propagar o erro real da API.** Nunca retornar uma mensagem genérica como "Erro ao salvar." sem tentar extrair o detalhe da resposta. Quando o parse do JSON falhar, incluir o status HTTP e o conteúdo bruto na mensagem de erro:
+
+```csharp
+// Padrão a seguir no BFF
+if (!response.IsSuccessStatusCode)
+{
+    var content = await response.Content.ReadAsStringAsync();
+    var detail = TryExtractDetail(content);
+    return new Result { Success = false, Error = detail ?? $"Erro HTTP {(int)response.StatusCode}: {content}" };
+}
+```
+
+**Os endpoints não devem usar `Results.BadRequest("string")` com texto puro** — use sempre `CustomResults.Problem(result)` para que o BFF consiga extrair o `detail` do `ProblemDetails`.
+
+---
+
+### Decomposição de componentes Blazor
+
+Sempre que uma página ou code-behind ficar extensa, extraia partes em componentes filhos — exatamente como se faria com componentes React. A regra prática:
+
+- **Dialog/modal** → componente próprio (ex: `ServicoFormDialog.razor` + `ServicoFormDialog.razor.cs`)
+- **Seção visualmente distinta** (cards, tabela, formulário inline) → componente próprio
+- **Lógica de state complexa** → pode ir para um serviço de estado ou para o code-behind do componente filho
+
+**Estrutura de pasta:** componentes filhos vivem numa subpasta com o nome da feature dentro de `Pages/`:
+```
+Pages/
+  Horarios/
+    Index.razor          ← página principal (rota)
+    Index.razor.cs
+    Components/
+      HorarioFormDialog.razor
+      HorarioFormDialog.razor.cs
+      HorariosTable.razor
+      HorariosTable.razor.cs
+```
+
+**Comunicação pai → filho:** parâmetros `[Parameter]`.
+**Comunicação filho → pai:** `[Parameter] EventCallback<T> OnAlterado` invocado com `await OnAlterado.InvokeAsync(valor)`.
+**Email do usuário:** nunca passe o email como `[Parameter]` entre componentes — o ciclo de render do Blazor pode entregar o valor vazio antes da hidratação completa. Sempre obtenha o email diretamente do `[CascadingParameter] Task<AuthenticationState>` no momento da ação:
+```csharp
+var authState = await AuthState;
+var email = authState.User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
+```
+**Compartilhar estado:** passe o objeto ou a função de recarga como `[Parameter]` — evite serviços de estado globais a menos que múltiplas páginas precisem do mesmo dado.
+
+---
+
 ### Convenções por camada
 
 **Blazor Page**
@@ -188,6 +258,34 @@ Sem o provider, Snackbar/Dialog não funcionam mesmo que o componente esteja no 
 
 ---
 
+## Soft delete obrigatório
+
+**Nunca use `DELETE` físico no banco de dados.** Toda operação de "exclusão" pelo usuário deve apenas marcar o registro como inativo (`Active = false` / `Ativo = false`). Isso preserva histórico e permite recuperação.
+
+Regras:
+- Repositórios devem ter `DeactivateAsync` (ou `InactivateAsync`) em vez de `DeleteAsync`.
+- Queries de listagem sempre filtram por `Active = true` — registros inativos são invisíveis para o sistema.
+- O endpoint HTTP pode continuar usando o verbo `DELETE` (semântica de "remover da visão do usuário"), mas a implementação é sempre um `UPDATE Active = false`.
+
+```csharp
+// Repositório
+public async Task DeactivateAsync(MinhaEntidade entity)
+{
+    entity.Active = false;
+    context.MinhaEntidade.Update(entity);
+    await context.SaveChangesAsync();
+}
+
+// Query de listagem — sempre filtra ativos
+public Task<List<MinhaEntidade>> GetByProfessionalIdAsync(Guid professionalId) =>
+    context.MinhaEntidade
+        .Where(e => e.ProfessionalId == professionalId && e.Active)
+        ...
+        .ToListAsync();
+```
+
+---
+
 ## Pontos importantes
 
 - **Registro de serviços no `Program.cs`:** Todo `builder.Services.*` deve estar **antes** de `builder.Build()`. Colocar depois faz o container de DI ignorar o registro e quebra o EF em design time.
@@ -200,4 +298,25 @@ Sem o provider, Snackbar/Dialog não funcionam mesmo que o componente esteja no 
 
 - **CORS:** A API libera `https://localhost:7137` (porta padrão do projeto Blazor server).
 
+---
+
+## Roadmap de implementação
+
+### Já implementado
+- Autenticação (Register / Login / Logout) via ASP.NET Identity
+- Onboarding do profissional (`/onboarding`) — cria o registro em `Profissionais`
+- Dashboard básico (`/dashboard`)
+- CRUD de Serviços (`/servicos`) — Create + List
+- Repositórios: `ICategoryRepository`, `IProfessionalRepository`, `IServiceRepository`
+
+### Próximos passos (ordem de dependência)
+
+| # | Funcionalidade | Por quê antes |
+|---|---|---|
+| 1 | **Horários disponíveis** (`/horarios`) | Pré-requisito para calcular slots na página pública |
+| 2 | **Página pública de agendamento** (`/agendar/{slug}`) | Core do produto — cliente escolhe serviço + slot e agenda sem login |
+| 3 | **Agendamentos no painel** (`/agendamentos`) | Profissional visualiza, confirma ou cancela pedidos |
+| 4 | **Clientes** (`/clientes`) | Criados automaticamente ao agendar; página de gerenciamento é secundária |
+| 5 | **Pagamentos via PIX** | Geração do payload "Copia e Cola" + QR Code; confirmação manual |
+| 6 | **Notificações WhatsApp** | Confirmação e lembretes automáticos (integração externa) |
 

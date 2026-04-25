@@ -36,10 +36,11 @@ else if (profile is not null)
         </MudItem>
 
         <MudItem xs="12" sm="4">
-            <MudPaper Class="pa-6" Elevation="1" Style="border-radius: 16px; text-align: center;">
+            <MudPaper Class="pa-6" Elevation="1" Style="border-radius: 16px; text-align: center; cursor: pointer;"
+                      @onclick="@(() => Nav.NavigateTo("/horarios "))">
                 <MudIcon Icon="@Icons.Material.Filled.AccessTime" Color="Color.Primary" Size="Size.Large" Class="mb-2" />
                 <MudText Typo="Typo.h6" Class="font-weight-bold">Horários</MudText>
-                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">Em breve</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">Criar Horário</MudText>
             </MudPaper>
         </MudItem>
     </MudGrid>
