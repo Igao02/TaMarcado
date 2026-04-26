@@ -187,6 +187,16 @@ Pages/
 
 **Comunicação pai → filho:** parâmetros `[Parameter]`.
 **Comunicação filho → pai:** `[Parameter] EventCallback<T> OnAlterado` invocado com `await OnAlterado.InvokeAsync(valor)`.
+**MudDialog dentro de componente filho:** nunca use `@bind-Visible="Visible"` no `MudDialog` — quando o usuário fecha pelo X ou Escape, o MudDialog chama seu próprio `VisibleChanged` mas não propaga para o pai, travando a reabertura. Use sempre a forma explícita:
+```razor
+<MudDialog Visible="Visible" VisibleChanged="HandleVisibleChanged" ...>
+```
+```csharp
+protected async Task HandleVisibleChanged(bool value)
+{
+    if (!value) await CloseDialog(); // CloseDialog chama VisibleChanged.InvokeAsync(false)
+}
+```
 **Email do usuário:** nunca passe o email como `[Parameter]` entre componentes — o ciclo de render do Blazor pode entregar o valor vazio antes da hidratação completa. Sempre obtenha o email diretamente do `[CascadingParameter] Task<AuthenticationState>` no momento da ação:
 ```csharp
 var authState = await AuthState;
@@ -217,8 +227,10 @@ var email = authState.User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
 - Chama o UseCase Handler e retorna `result.Match(onSuccess, onFailure)`
 
 **UseCase** (`TaMarcado.Aplicacao/UseCases/<Feature>/<Action>/`)
-- Três arquivos: `Command.cs` (record), `Handler.cs` (class), `Response.cs` (record)
+- **Sempre três arquivos, sem exceção:** `Command.cs` (record), `Handler.cs` (class), `Response.cs` (record)
+- Isso vale para delete, activate, deactivate — qualquer ação. Delete retorna `Result<DeleteXxxResponse>` com o Id confirmado, nunca `Result` sem genérico.
 - Namespace plural para evitar colisão com entidades: `UseCases.Professionals.*`, `UseCases.Services.*`
+- Handler recebe sempre um `Command` (nunca parâmetros avulsos como `Guid id, Guid professionalId`)
 - Handler injeta apenas `IRepository` interfaces — nunca `ApplicationDbContext` diretamente
 - Retorna `Result<TResponse>` do `TaMarcado.Compartilhado`
 - Sempre envolve o corpo em try/catch retornando `Error.Problem` em caso de exceção

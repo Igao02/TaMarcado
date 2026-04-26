@@ -21,10 +21,17 @@ public class ServiceRepository(ApplicationDbContext context) : IServiceRepositor
 
     public Task<Service?> GetByIdAndProfessionalIdAsync(Guid id, Guid professionalId) =>
         context.Service
-            .FirstOrDefaultAsync(s => s.Id == id && s.ProfessionalId == professionalId);
+            .FirstOrDefaultAsync(s => s.Id == id && s.ProfessionalId == professionalId && s.IsActive);
 
     public async Task UpdateAsync(Service service)
     {
+        context.Service.Update(service);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task DeactivateAsync(Service service)
+    {
+        service.IsActive = false;
         context.Service.Update(service);
         await context.SaveChangesAsync();
     }

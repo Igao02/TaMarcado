@@ -14,6 +14,8 @@ public class ServicesPageBase : ComponentBase
     protected bool isLoading = true;
     protected bool isSaving;
     protected bool dialogOpen;
+    protected Guid? _deletingId;
+
 
     protected readonly DialogOptions dialogOptions = new()
     {
@@ -108,6 +110,58 @@ public class ServicesPageBase : ComponentBase
         finally
         {
             isSaving = false;
+            StateHasChanged();
+        }
+    }
+
+    protected async Task HandleDelete(Guid id)
+    {
+        _deletingId = id;
+        StateHasChanged();
+        try
+        {
+            var authState = await AuthState;
+            var email = authState.User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
+            if(string.IsNullOrEmpty(email))
+            {
+                Snackbar.Add("Usuário não autenticado.", Severity.Warning, config =>
+                {
+                    config.Icon = Icons.Material.Filled.Warning;
+                    config.ShowCloseIcon = true;
+                });
+                return;
+            }
+
+            var result = await ServiceHandler.DeleteService(id, email);
+            if (result.Success)
+            {
+                Snackbar.Add("Serviço deletado com sucesso!", Severity.Success, config =>
+                {
+                    config.Icon = Icons.Material.Filled.CheckCircle;
+                    config.ShowCloseIcon = true;
+                });
+                await LoadServices();
+            }
+            else
+            {
+                Snackbar.Add(result.Error ?? "Erro ao deletar serviço.", Severity.Error, config =>
+                {
+                    config.Icon = Icons.Material.Filled.Error;
+                    config.ShowCloseIcon = true;
+                });
+            }
+        }
+        catch (Exception ex) when (ex is not NavigationException)
+        {
+            Snackbar.Add($"Erro inesperado: {ex.Message}", Severity.Error, config =>
+            {
+                config.Icon = Icons.Material.Filled.Error;
+                config.ShowCloseIcon = true;
+            });
+        }
+        finally
+        {
+            _deletingId = null;
             StateHasChanged();
         }
     }

@@ -5,22 +5,24 @@ namespace TaMarcado.Aplicacao.UseCases.AvaliableTimes.DeleteAvaliableTime;
 
 public class DeleteAvaliableTimeHandler(IAvaliableTimeRepository repository)
 {
-    public async Task<Result> Handle(Guid id, Guid professionalId)
+    public async Task<Result<DeleteAvaliableTimeResponse>> Handle(DeleteAvaliableTimeCommand command)
     {
         try
         {
-            var avaliableTime = await repository.GetByIdAndProfessionalIdAsync(id, professionalId);
+            var avaliableTime = await repository.GetByIdAndProfessionalIdAsync(command.Id, command.ProfessionalId);
 
             if (avaliableTime is null)
-                return Result.Failure(Error.NotFound("AvaliableTime.NotFound", "Horário não encontrado."));
+                return Result.Failure<DeleteAvaliableTimeResponse>(
+                    Error.NotFound("AvaliableTime.NotFound", "Horário não encontrado."));
 
             await repository.DeactivateAsync(avaliableTime);
 
-            return Result.Success();
+            return Result.Success(new DeleteAvaliableTimeResponse(command.Id));
         }
         catch (Exception ex)
         {
-            return Result.Failure(Error.Problem("AvaliableTime.DeleteError", ex.Message));
+            return Result.Failure<DeleteAvaliableTimeResponse>(
+                Error.Problem("AvaliableTime.DeleteError", ex.Message));
         }
     }
 }

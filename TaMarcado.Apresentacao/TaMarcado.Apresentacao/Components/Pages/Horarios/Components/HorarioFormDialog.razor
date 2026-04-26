@@ -1,6 +1,6 @@
 @inherits HorarioFormDialogBase
 
-<MudDialog @bind-Visible="Visible" Options="_dialogOptions">
+<MudDialog Visible="Visible" VisibleChanged="HandleVisibleChanged" Options="_dialogOptions">
     <TitleContent>
         <MudText Typo="Typo.h6">Novo horário</MudText>
     </TitleContent>

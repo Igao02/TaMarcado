@@ -12,6 +12,7 @@ using TaMarcado.Aplicacao.UseCases.AvaliableTimes.DeleteAvaliableTime;
 using TaMarcado.Dominio.Repositories;
 using TaMarcado.Infraestrutura.Repositories;
 using TaMarcado.Infraestrutura.Data;
+using TaMarcado.Aplicacao.UseCases.Services.DeleteServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +61,7 @@ builder.Services.AddScoped<GetProfessionalHandler>();
 builder.Services.AddScoped<GetCategoriesHandler>();
 builder.Services.AddScoped<CreateServiceHandler>();
 builder.Services.AddScoped<GetServicesHandler>();
+builder.Services.AddScoped<DeleteServicesHandler>();
 builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 
 var app = builder.Build();

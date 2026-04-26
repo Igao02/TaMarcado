@@ -8,4 +8,5 @@ public interface IServiceRepository
     Task<List<Service>> GetByProfessionalIdAsync(Guid professionalId);
     Task<Service?> GetByIdAndProfessionalIdAsync(Guid id, Guid professionalId);
     Task UpdateAsync(Service service);
+    Task DeactivateAsync(Service service);
 }

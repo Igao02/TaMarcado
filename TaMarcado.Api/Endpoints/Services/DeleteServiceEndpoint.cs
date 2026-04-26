@@ -1,23 +1,23 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using TaMarcado.Api.Extensions;
 using TaMarcado.Api.Infrastructure;
-using TaMarcado.Aplicacao.UseCases.AvaliableTimes.DeleteAvaliableTime;
+using TaMarcado.Aplicacao.UseCases.Services.DeleteServices;
 using TaMarcado.Compartilhado;
 using TaMarcado.Dominio.Repositories;
 using TaMarcado.Infraestrutura.Data;
 
-namespace TaMarcado.Api.Endpoints.AvaliableTimes;
+namespace TaMarcado.Api.Endpoints.Services;
 
-public class DeleteAvaliableTimeEndpoint : IEndpoint
+public class DeleteServiceEndpoint : IEndpoint
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapDelete("/api/available-times/{id:guid}", async (
+        app.MapDelete("/api/services/{id:guid}", async (
             Guid id,
             string email,
             UserManager<ApplicationUser> userManager,
             IProfessionalRepository professionalRepository,
-            DeleteAvaliableTimeHandler handler) =>
+            DeleteServicesHandler handler) =>
         {
             var user = await userManager.FindByEmailAsync(email);
             if (user is null)
@@ -28,7 +28,7 @@ public class DeleteAvaliableTimeEndpoint : IEndpoint
                 return CustomResults.Problem(
                     Result.Failure(Error.NotFound("Professional.NotFound", "Perfil profissional não encontrado.")));
 
-            var command = new DeleteAvaliableTimeCommand(id, professionalId.Value);
+            var command = new DeleteServicesCommand(id, professionalId.Value);
             var result = await handler.Handle(command);
 
             return result.Match(

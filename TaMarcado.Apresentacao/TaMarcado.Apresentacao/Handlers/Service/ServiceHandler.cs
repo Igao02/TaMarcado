@@ -67,6 +67,33 @@ public class ServiceHandler(IHttpClientFactory httpClientFactory)
         }
     }
 
+    public async Task<ServiceResult> DeleteService(Guid id, string userEmail)
+    {
+        try
+        {
+            var client = httpClientFactory.CreateClient("ApiBack");
+            var response = await client.DeleteAsync($"/api/services/{id}?email={Uri.EscapeDataString(userEmail)}");
+
+            if (response.IsSuccessStatusCode)
+                return new ServiceResult { Success = true };
+
+            var content = await response.Content.ReadAsStringAsync();
+            try
+            {
+                var error = JsonSerializer.Deserialize<ErrorResponse>(content, JsonOptions);
+                return new ServiceResult { Success = false, Error = error?.Detail ?? "Erro ao deletar serviço." };
+            }
+            catch
+            {
+                return new ServiceResult { Success = false, Error = "Erro ao deletar serviço." };
+            }
+        }
+        catch (Exception ex)
+        {
+            return new ServiceResult { Success = false, Error = $"Erro inesperado: {ex.Message}" };
+        }
+    }
+
     // --- Models ---
 
     public class CreateServiceModel

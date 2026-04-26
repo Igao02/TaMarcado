@@ -82,6 +82,12 @@ public class HorarioFormDialogBase : ComponentBase
         await CloseDialog();
     }
 
+    protected async Task HandleVisibleChanged(bool value)
+    {
+        if (!value)
+            await CloseDialog();
+    }
+
     private async Task CloseDialog()
     {
         _model = new();
