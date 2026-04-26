@@ -6,7 +6,7 @@
 <PageTitle>Serviços — TaMarcado</PageTitle>
 
 <div class="d-flex align-center justify-space-between mb-6">
-    <MudText Typo="Typo.h5" Class="font-weight-bold">Meus Serviços</MudText>
+    <MudText Typo="Typo.h5" Style="margin-top: 20px;" Class="font-weight-bold">Meus Serviços</MudText>
     <MudButton Variant="Variant.Filled"
                Color="Color.Primary"
                StartIcon="@Icons.Material.Filled.Add"
@@ -47,6 +47,11 @@ else
                         <MudChip T="string" Color="@(service.IsActive ? Color.Success : Color.Default)" Size="Size.Small">
                             @(service.IsActive ? "Ativo" : "Inativo")
                         </MudChip>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Error"
+                                   Size="Size.Small"
+                                   OnClick="@(() => HandleDelete(service.Id))"
+                                   Disabled="_deletingId == service.Id" />
                     </div>
                     @if (!string.IsNullOrWhiteSpace(service.Description))
                     {
