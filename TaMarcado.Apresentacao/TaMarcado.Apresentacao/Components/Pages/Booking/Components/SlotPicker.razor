@@ -1,0 +1,17 @@
+@inherits SlotPickerBase
+
+<MudText Typo="Typo.subtitle2" Class="mb-2">Horários disponíveis</MudText>
+
+<div class="d-flex flex-wrap gap-2">
+    @foreach (var slot in Slots)
+    {
+        var isSelected = SelectedSlot == slot.StartTime;
+        <MudButton Variant="@(isSelected ? Variant.Filled : Variant.Outlined)"
+                   Color="Color.Primary"
+                   Size="Size.Small"
+                   Class="rounded-pill"
+                   OnClick="@(() => HandleSelect(slot.StartTime))">
+            @slot.StartTime
+        </MudButton>
+    }
+</div>

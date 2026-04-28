@@ -20,6 +20,24 @@
                         </MudText>
                     </div>
 
+                    <MudText Typo="Typo.subtitle2" Class="mb-2">Tipo de conta</MudText>
+                    <MudButtonGroup OverrideStyles="false" Class="mb-4 d-flex" FullWidth="true">
+                        <MudButton Variant="@(model.Role == "Profissional" ? Variant.Filled : Variant.Outlined)"
+                                   Color="Color.Primary"
+                                   FullWidth="true"
+                                   OnClick="@(() => model.Role = "Profissional")"
+                                   StartIcon="@Icons.Material.Filled.Work">
+                            Profissional
+                        </MudButton>
+                        <MudButton Variant="@(model.Role == "Cliente" ? Variant.Filled : Variant.Outlined)"
+                                   Color="Color.Primary"
+                                   FullWidth="true"
+                                   OnClick="@(() => model.Role = "Cliente")"
+                                   StartIcon="@Icons.Material.Filled.Person">
+                            Cliente
+                        </MudButton>
+                    </MudButtonGroup>
+
                     @if (errorMessage is not null)
                     {
                         <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="mb-4 rounded-xl" Dense="false" Icon="@Icons.Material.Filled.ErrorOutline">

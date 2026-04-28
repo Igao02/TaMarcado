@@ -1,0 +1,55 @@
+@page "/meus-agendamentos"
+@rendermode InteractiveServer
+@attribute [Authorize]
+@inherits MySchedulingsPageBase
+
+<PageTitle>Encontre seu profissional — TaMarcado</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudText Typo="Typo.h5" Class="font-weight-bold mb-4">Encontre seu profissional</MudText>
+
+    @if (IsLoading)
+    {
+        <div class="d-flex justify-center mt-8">
+            <MudProgressCircular Indeterminate Color="Color.Primary" />
+        </div>
+    }
+    else
+    {
+        <MudTextField @bind-Value="SearchText"
+                      Placeholder="Buscar por nome..."
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Immediate="true"
+                      Variant="Variant.Outlined"
+                      Class="mb-3" />
+
+        <MudChipSet T="string" @bind-SelectedValue="SelectedCategory" SelectionMode="SelectionMode.SingleSelection" Class="mb-4">
+            <MudChip T="string" Value="@((string?)null)" Variant="Variant.Outlined" Color="Color.Default">Todos</MudChip>
+            @foreach (var cat in Categories)
+            {
+                <MudChip T="string" Value="@cat" Variant="Variant.Outlined" Color="Color.Primary">@cat</MudChip>
+            }
+        </MudChipSet>
+
+        @if (FilteredProfessionals.Any())
+        {
+            <MudGrid>
+                @foreach (var p in FilteredProfessionals)
+                {
+                    <MudItem xs="12" sm="6" md="4">
+                        <ProfessionalCard Professional="p" OnSelect="NavigateToBooking" />
+                    </MudItem>
+                }
+            </MudGrid>
+        }
+        else
+        {
+            <MudPaper Elevation="1" Class="pa-8 rounded-xl text-center mt-4">
+                <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Color="Color.Default" Class="mb-3" />
+                <MudText Typo="Typo.h6" Class="mb-2">Nenhum profissional encontrado</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">Tente outro filtro ou nome.</MudText>
+            </MudPaper>
+        }
+    }
+</MudContainer>

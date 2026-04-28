@@ -1,4 +1,5 @@
-﻿using TaMarcado.Dominio.Enum;
+﻿using System.Diagnostics.CodeAnalysis;
+using TaMarcado.Dominio.Enum;
 using TaMarcado.DominioPrincipal.Entities;
 
 namespace TaMarcado.Dominio.Entities;
@@ -23,6 +24,7 @@ public class Scheduling : Entity
     public virtual required Service Service { get; set; }
     public virtual required Client Client { get; set; }
 
+    [SetsRequiredMembers]
     public Scheduling(Guid professionalId, Guid serviceId, Guid clientId, DateTime initDate, DateTime endDate, StatusEnum status, decimal price, string? observation, DateTime createdAt)
     {
         ProfessionalId = professionalId;

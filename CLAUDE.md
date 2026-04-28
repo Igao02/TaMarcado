@@ -316,19 +316,24 @@ public Task<List<MinhaEntidade>> GetByProfessionalIdAsync(Guid professionalId) =
 
 ### Já implementado
 - Autenticação (Register / Login / Logout) via ASP.NET Identity
+- Roles "Profissional" e "Cliente" — registro com seleção de role, seed automático das roles na API
 - Onboarding do profissional (`/onboarding`) — cria o registro em `Profissionais`
 - Dashboard básico (`/dashboard`)
 - CRUD de Serviços (`/servicos`) — Create + List
-- Repositórios: `ICategoryRepository`, `IProfessionalRepository`, `IServiceRepository`
+- Horários disponíveis (`/horarios`) — CRUD por dia da semana
+- Página pública de agendamento (`/agendar/{slug}`) — seleção de serviço, data, slot + criação de agendamento autenticado
+- Página de agendamentos do cliente (`/meus-agendamentos`) — placeholder
+- Menu de navegação com roles separadas (Profissional vs Cliente)
+- Repositórios: `ICategoryRepository`, `IProfessionalRepository`, `IServiceRepository`, `IClientRepository`, `ISchedulingRepository`, `IAvaliableTimeRepository`
+- Endpoints públicos: `GET /api/public/profile/{slug}`, `GET /api/public/services/{slug}`, `GET /api/public/available-slots/{slug}`, `POST /api/public/scheduling`
 
 ### Próximos passos (ordem de dependência)
 
 | # | Funcionalidade | Por quê antes |
 |---|---|---|
-| 1 | **Horários disponíveis** (`/horarios`) | Pré-requisito para calcular slots na página pública |
-| 2 | **Página pública de agendamento** (`/agendar/{slug}`) | Core do produto — cliente escolhe serviço + slot e agenda sem login |
-| 3 | **Agendamentos no painel** (`/agendamentos`) | Profissional visualiza, confirma ou cancela pedidos |
-| 4 | **Clientes** (`/clientes`) | Criados automaticamente ao agendar; página de gerenciamento é secundária |
-| 5 | **Pagamentos via PIX** | Geração do payload "Copia e Cola" + QR Code; confirmação manual |
-| 6 | **Notificações WhatsApp** | Confirmação e lembretes automáticos (integração externa) |
+| 1 | **Home do cliente — descoberta de serviços** (`/`) | Clientes precisam encontrar profissionais sem conhecer o slug |
+| 2 | **Agendamentos no painel** (`/agendamentos`) | Profissional visualiza, confirma ou cancela pedidos |
+| 3 | **Clientes** (`/clientes`) | Criados automaticamente ao agendar; página de gerenciamento é secundária |
+| 4 | **Pagamentos via PIX** | Geração do payload "Copia e Cola" + QR Code; confirmação manual |
+| 5 | **Notificações WhatsApp** | Confirmação e lembretes automáticos (integração externa) |
 

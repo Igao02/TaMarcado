@@ -38,13 +38,14 @@ public class AuthHandler
     {
         var client = _httpClientFactory.CreateClient("ApiBack");
 
-        var request = new RegisterRequest
+        var request = new
         {
-            Email = model.Email,
-            Password = model.Password
+            email = model.Email,
+            password = model.Password,
+            role = model.Role
         };
 
-        var response = await client.PostAsJsonAsync("/register", request);
+        var response = await client.PostAsJsonAsync("/api/auth/register", request);
 
         if (response.IsSuccessStatusCode)
         {
@@ -55,26 +56,16 @@ public class AuthHandler
 
         try
         {
-            var errorResponse = JsonSerializer.Deserialize<ValidationErrorResponse>(content);
-
-            var firstError = errorResponse?.Errors
-                .SelectMany(e => e.Value)
-                .FirstOrDefault();
-
-            return new AuthResult
+            using var doc = System.Text.Json.JsonDocument.Parse(content);
+            if (doc.RootElement.TryGetProperty("errors", out var errorsEl))
             {
-                Success = false,
-                Error = TranslateError(firstError)
-            };
+                var firstError = errorsEl.EnumerateArray().Select(e => e.GetString()).FirstOrDefault();
+                return new AuthResult { Success = false, Error = TranslateError(firstError) };
+            }
         }
-        catch
-        {
-            return new AuthResult
-            {
-                Success = false,
-                Error = "Erro ao registrar usuário."
-            };
-        }
+        catch { }
+
+        return new AuthResult { Success = false, Error = "Erro ao registrar usuário." };
     }
 
     public class AuthResult
@@ -99,6 +90,9 @@ public class AuthHandler
         [Required(ErrorMessage = "Você deve aceitar os termos de uso")]
         [Range(typeof(bool), "true", "true", ErrorMessage = "Você deve aceitar os termos de uso")]
         public bool AceitoTermos { get; set; }
+
+        [Required(ErrorMessage = "Selecione o tipo de conta")]
+        public string Role { get; set; } = "Cliente";
     }
 
 }

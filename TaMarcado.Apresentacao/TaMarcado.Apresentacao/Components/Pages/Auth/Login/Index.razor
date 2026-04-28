@@ -33,6 +33,10 @@
                     }
 
                     <form method="post" action="/auth/login">
+                        @if (!string.IsNullOrEmpty(ReturnUrlParam))
+                        {
+                            <input type="hidden" name="returnUrl" value="@ReturnUrlParam" />
+                        }
                         <MudTextField T="string"
                                       Name="email"
                                       Label="E-mail"
@@ -98,4 +102,7 @@
 
     [SupplyParameterFromQuery(Name = "cadastro")]
     private string? CadastroParam { get; set; }
+
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    private string? ReturnUrlParam { get; set; }
 }

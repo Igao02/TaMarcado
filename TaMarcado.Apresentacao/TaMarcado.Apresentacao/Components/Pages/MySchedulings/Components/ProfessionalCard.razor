@@ -1,0 +1,29 @@
+@inherits ProfessionalCardBase
+
+<MudCard Class="cursor-pointer h-100" Elevation="2" @onclick="() => OnSelect.InvokeAsync(Professional)">
+    @if (!string.IsNullOrEmpty(Professional.PhotoUrl))
+    {
+        <MudCardMedia Image="@Professional.PhotoUrl" Height="160" />
+    }
+    else
+    {
+        <div style="height:160px; display:flex; align-items:center; justify-content:center; background:#f5f5f5;">
+            <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Large" Color="Color.Default" />
+        </div>
+    }
+    <MudCardContent>
+        <MudText Typo="Typo.subtitle1" Class="font-weight-bold">@Professional.ExibitionName</MudText>
+        <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="mt-1 mb-1">@Professional.CategoryName</MudChip>
+        @if (!string.IsNullOrEmpty(Professional.Bio))
+        {
+            <MudText Typo="Typo.body2" Class="mt-1 mud-text-secondary">
+                @(Professional.Bio.Length > 80 ? Professional.Bio[..80] + "…" : Professional.Bio)
+            </MudText>
+        }
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CalendarMonth" OnClick="() => OnSelect.InvokeAsync(Professional)">
+            Ver horários
+        </MudButton>
+    </MudCardActions>
+</MudCard>

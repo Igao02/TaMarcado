@@ -6,6 +6,7 @@ using TaMarcado.Apresentacao.Handlers.Auth;
 using TaMarcado.Apresentacao.Handlers.Professional;
 using TaMarcado.Apresentacao.Handlers.Service;
 using TaMarcado.Apresentacao.Handlers.AvaliableTime;
+using TaMarcado.Apresentacao.Handlers.Booking;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,7 @@ builder.Services.AddScoped<AuthHandler>();
 builder.Services.AddScoped<ProfessionalHandler>();
 builder.Services.AddScoped<ServiceHandler>();
 builder.Services.AddScoped<AvaliableTimeHandler>();
+builder.Services.AddScoped<BookingHandler>();
 
 var app = builder.Build();
 
