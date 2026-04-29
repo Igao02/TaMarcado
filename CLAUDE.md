@@ -316,19 +316,25 @@ public Task<List<MinhaEntidade>> GetByProfessionalIdAsync(Guid professionalId) =
 
 ### Já implementado
 - Autenticação (Register / Login / Logout) via ASP.NET Identity
+- Roles "Profissional" e "Cliente" — registro com seleção de role, seed automático das roles na API
 - Onboarding do profissional (`/onboarding`) — cria o registro em `Profissionais`
 - Dashboard básico (`/dashboard`)
 - CRUD de Serviços (`/servicos`) — Create + List
-- Repositórios: `ICategoryRepository`, `IProfessionalRepository`, `IServiceRepository`
+- Horários disponíveis (`/horarios`) — CRUD por dia da semana
+- Página pública de agendamento (`/agendar/{slug}`) — seleção de serviço, data, slot + criação de agendamento autenticado
+- Home do cliente (`/meus-agendamentos`) — descoberta de profissionais com filtro por categoria e busca por nome
+- Painel de agendamentos do profissional (`/agendamentos`) — lista com filtro por status, ações de confirmar/cancelar/concluir
+- Menu de navegação com roles separadas (Profissional vs Cliente)
+- Repositórios: `ICategoryRepository`, `IProfessionalRepository`, `IServiceRepository`, `IClientRepository`, `ISchedulingRepository`, `IAvaliableTimeRepository`
+- Endpoints públicos: `GET /api/public/profile/{slug}`, `GET /api/public/services/{slug}`, `GET /api/public/available-slots/{slug}`, `POST /api/public/scheduling`, `GET /api/public/professionals`
+- Endpoints autenticados (profissional): `GET /api/schedulings`, `PUT /api/schedulings/{id}/confirm`, `PUT /api/schedulings/{id}/cancel`, `PUT /api/schedulings/{id}/conclude`
 
 ### Próximos passos (ordem de dependência)
 
 | # | Funcionalidade | Por quê antes |
 |---|---|---|
-| 1 | **Horários disponíveis** (`/horarios`) | Pré-requisito para calcular slots na página pública |
-| 2 | **Página pública de agendamento** (`/agendar/{slug}`) | Core do produto — cliente escolhe serviço + slot e agenda sem login |
-| 3 | **Agendamentos no painel** (`/agendamentos`) | Profissional visualiza, confirma ou cancela pedidos |
-| 4 | **Clientes** (`/clientes`) | Criados automaticamente ao agendar; página de gerenciamento é secundária |
-| 5 | **Pagamentos via PIX** | Geração do payload "Copia e Cola" + QR Code; confirmação manual |
-| 6 | **Notificações WhatsApp** | Confirmação e lembretes automáticos (integração externa) |
+| 1 | **Clientes** (`/clientes`) | Profissional visualiza e gerencia os clientes que agendaram com ele |
+| 2 | **Agendamentos do cliente** (`/meus-agendamentos` — expandir) | Cliente visualiza seus próprios agendamentos e pode cancelar |
+| 3 | **Pagamentos via PIX** | Geração do payload "Copia e Cola" + QR Code; confirmação manual pelo profissional |
+| 4 | **Notificações WhatsApp** | Confirmação e lembretes automáticos (integração externa) |
 

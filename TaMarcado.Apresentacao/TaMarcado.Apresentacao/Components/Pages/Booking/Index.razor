@@ -1,0 +1,133 @@
+@page "/agendar/{Slug}"
+@rendermode InteractiveServer
+@inherits BookingPageBase
+
+<PageTitle>@(Profile?.ExibitionName ?? "Agendamento") — TaMarcado</PageTitle>
+
+@if (IsLoadingProfile)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (ErrorMessage is not null)
+{
+    <MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+        <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="rounded-xl">
+            @ErrorMessage
+        </MudAlert>
+    </MudContainer>
+}
+else if (Profile is not null)
+{
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4 mb-8">
+
+        @* Header do profissional *@
+        <MudPaper Elevation="1" Class="pa-6 mb-4 rounded-xl">
+            <div class="d-flex align-center gap-4">
+                @if (!string.IsNullOrEmpty(Profile.PhotoUrl))
+                {
+                    <MudAvatar Style="width:64px;height:64px;">
+                        <MudImage Src="@Profile.PhotoUrl" Alt="@Profile.ExibitionName" />
+                    </MudAvatar>
+                }
+                else
+                {
+                    <MudAvatar Color="Color.Primary" Style="width:64px;height:64px;">
+                        @Profile.ExibitionName[..1].ToUpper()
+                    </MudAvatar>
+                }
+                <div>
+                    <MudText Typo="Typo.h5" Class="font-weight-bold">@Profile.ExibitionName</MudText>
+                    @if (!string.IsNullOrEmpty(Profile.Bio))
+                    {
+                        <MudText Typo="Typo.body2" Class="opacity-70">@Profile.Bio</MudText>
+                    }
+                </div>
+            </div>
+        </MudPaper>
+
+        @if (BookingSuccess)
+        {
+            <MudPaper Elevation="1" Class="pa-8 rounded-xl text-center">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Large" Class="mb-3" />
+                <MudText Typo="Typo.h5" Class="font-weight-bold mb-2">Agendamento confirmado!</MudText>
+                <MudText Typo="Typo.body1" Class="mb-6">
+                    Seu agendamento com <strong>@Profile.ExibitionName</strong> foi realizado.
+                </MudText>
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="ResetBooking" Class="rounded-pill">
+                    Fazer outro agendamento
+                </MudButton>
+            </MudPaper>
+        }
+        else
+        {
+            @* Passo 1: Seleção de serviço *@
+            <MudText Typo="Typo.h6" Class="font-weight-bold mb-3">1. Escolha o serviço</MudText>
+
+            @if (Services.Count == 0)
+            {
+                <MudAlert Severity="Severity.Info" Class="mb-4 rounded-xl">
+                    Nenhum serviço disponível no momento.
+                </MudAlert>
+            }
+            else
+            {
+                <MudGrid Class="mb-4">
+                    @foreach (var service in Services.Where(s => s.IsActive))
+                    {
+                        <MudItem xs="12" sm="6">
+                            <ServiceCard
+                                Service="service"
+                                IsSelected="SelectedService?.Id == service.Id"
+                                OnSelect="OnServiceSelected" />
+                        </MudItem>
+                    }
+                </MudGrid>
+            }
+
+            @if (SelectedService is not null)
+            {
+                @* Passo 2: Data e slot *@
+                <MudText Typo="Typo.h6" Class="font-weight-bold mb-3 mt-2">2. Escolha a data e o horário</MudText>
+
+                <MudPaper Elevation="1" Class="pa-4 mb-4 rounded-xl">
+                    <MudDatePicker Label="Data"
+                                   DateChanged="@(async d => await OnDateChanged(d.HasValue ? DateOnly.FromDateTime(d.Value) : null))"
+                                   MinDate="DateTime.Today"
+                                   Variant="Variant.Outlined"
+                                   Class="mb-4"
+                                   PickerVariant="PickerVariant.Static" />
+
+                    @if (IsLoadingSlots)
+                    {
+                        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mt-2" />
+                    }
+                    else if (SelectedDate is not null && AvailableSlots.Count > 0)
+                    {
+                        <SlotPicker
+                            Slots="AvailableSlots"
+                            SelectedSlot="SelectedSlot"
+                            OnSlotSelected="OnSlotSelected" />
+                    }
+                    else if (SelectedDate is not null && AvailableSlots.Count == 0)
+                    {
+                        <MudText Typo="Typo.body2" Class="opacity-70">
+                            Nenhum horário disponível para esta data.
+                        </MudText>
+                    }
+                </MudPaper>
+            }
+
+            @if (SelectedSlot is not null)
+            {
+                @* Passo 3: Dados do cliente *@
+                <MudText Typo="Typo.h6" Class="font-weight-bold mb-3 mt-2">3. Seus dados</MudText>
+
+                <ClientInfoForm
+                    Model="BookingModel"
+                    OnSubmit="HandleConfirm"
+                    IsLoading="IsConfirming" />
+            }
+        }
+
+    </MudContainer>
+}

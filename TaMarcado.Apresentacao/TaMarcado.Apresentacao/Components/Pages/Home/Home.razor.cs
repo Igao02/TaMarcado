@@ -21,6 +21,12 @@ public class HomePageBase : ComponentBase
             return;
         }
 
+        if (authState.User.IsInRole("Cliente"))
+        {
+            Nav.NavigateTo("/meus-agendamentos");
+            return;
+        }
+
         var email = authState.User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
 
         try

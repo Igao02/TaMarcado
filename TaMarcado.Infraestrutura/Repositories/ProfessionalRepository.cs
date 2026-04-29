@@ -29,4 +29,15 @@ public class ProfessionalRepository(ApplicationDbContext context) : IProfessiona
             .Where(p => p.ApplicationUserId == userId)
             .Select(p => (Guid?)p.Id)
             .FirstOrDefaultAsync();
+
+    public Task<Professional?> GetBySlugAsync(string slug) =>
+        context.Professional
+            .FirstOrDefaultAsync(p => p.Slug == slug && p.Active);
+
+    public Task<List<Professional>> GetAllActiveWithCategoryAsync() =>
+        context.Professional
+            .Include(p => p.Category)
+            .Where(p => p.Active)
+            .OrderBy(p => p.ExibitionName)
+            .ToListAsync();
 }

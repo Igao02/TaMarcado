@@ -17,12 +17,13 @@ public class IndexPageBase : ComponentBase
     [Inject] protected AuthHandler Auth { get; set; } = default!;
     [Inject] protected ISnackbar Snackbar { get; set; } = default!;
 
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    protected string? ReturnUrl { get; set; }
+
     public async Task HandleRegister()
     {
-        // Limpa erro anterior
         errorMessage = null;
 
-        // Validação de termos
         if (!model.AceitoTermos)
         {
             errorMessage = "Você precisa aceitar os termos de uso e política de privacidade.";
@@ -38,12 +39,14 @@ public class IndexPageBase : ComponentBase
 
             if (resultado.Success)
             {
-                Snackbar.Add("Conta criada com sucesso! Verifique seu e-mail para ativação.", Severity.Success, config =>
+                Snackbar.Add("Conta criada com sucesso!", Severity.Success, config =>
                 {
                     config.Icon = Icons.Material.Filled.CheckCircle;
                     config.ShowCloseIcon = true;
                 });
-                Nav.NavigateTo("/login?cadastro=1");
+
+                var returnParam = string.IsNullOrEmpty(ReturnUrl) ? string.Empty : $"&returnUrl={Uri.EscapeDataString(ReturnUrl)}";
+                Nav.NavigateTo($"/login?cadastro=1{returnParam}");
             }
             else
             {

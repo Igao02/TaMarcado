@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using TaMarcado.Api.Extensions;
@@ -13,6 +14,14 @@ using TaMarcado.Dominio.Repositories;
 using TaMarcado.Infraestrutura.Repositories;
 using TaMarcado.Infraestrutura.Data;
 using TaMarcado.Aplicacao.UseCases.Services.DeleteServices;
+using TaMarcado.Aplicacao.UseCases.Booking.GetPublicProfile;
+using TaMarcado.Aplicacao.UseCases.Booking.GetAvailableSlots;
+using TaMarcado.Aplicacao.UseCases.Booking.CreateScheduling;
+using TaMarcado.Aplicacao.UseCases.Booking.GetPublicProfessionals;
+using TaMarcado.Aplicacao.UseCases.Schedulings.GetSchedulingsByProfessional;
+using TaMarcado.Aplicacao.UseCases.Schedulings.ConfirmScheduling;
+using TaMarcado.Aplicacao.UseCases.Schedulings.CancelScheduling;
+using TaMarcado.Aplicacao.UseCases.Schedulings.ConcludeScheduling;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +55,7 @@ builder.Services
     {
         options.SignIn.RequireConfirmedEmail = false;
     })
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddAuthorization();
@@ -62,9 +72,28 @@ builder.Services.AddScoped<GetCategoriesHandler>();
 builder.Services.AddScoped<CreateServiceHandler>();
 builder.Services.AddScoped<GetServicesHandler>();
 builder.Services.AddScoped<DeleteServicesHandler>();
+builder.Services.AddScoped<IClientRepository, ClientRepository>();
+builder.Services.AddScoped<ISchedulingRepository, SchedulingRepository>();
+builder.Services.AddScoped<GetPublicProfileHandler>();
+builder.Services.AddScoped<GetAvailableSlotsHandler>();
+builder.Services.AddScoped<CreateSchedulingHandler>();
+builder.Services.AddScoped<GetPublicProfessionalsHandler>();
+builder.Services.AddScoped<GetSchedulingsByProfessionalHandler>();
+builder.Services.AddScoped<ConfirmSchedulingHandler>();
+builder.Services.AddScoped<CancelSchedulingHandler>();
+builder.Services.AddScoped<ConcludeSchedulingHandler>();
 builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 
 var app = builder.Build();
+
+// Seed roles
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    foreach (var role in new[] { "Profissional", "Cliente" })
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole(role));
+}
 
 //CORS
 app.UseCors("ApiWeb");

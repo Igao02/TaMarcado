@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TaMarcado.Dominio.Entities;
+using TaMarcado.Infraestrutura.Data;
 
 namespace TaMarcado.Infraestrutura.EntitiesConfiguration;
 
@@ -9,6 +10,16 @@ internal class ClientConfiguration : IEntityTypeConfiguration<Client>
     public void Configure(EntityTypeBuilder<Client> builder)
     {
         builder.HasKey(c => c.Id);
+
+        builder
+            .Property(c => c.ApplicationUserId)
+            .IsRequired();
+
+        builder
+            .HasOne<ApplicationUser>()
+            .WithMany()
+            .HasForeignKey(c => c.ApplicationUserId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .Property(c => c.Name)

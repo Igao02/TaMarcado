@@ -1,0 +1,29 @@
+@inherits ServiceCardBase
+
+<MudCard Outlined="@(!IsSelected)"
+         Elevation="@(IsSelected ? 4 : 1)"
+         Style="@(IsSelected ? "border: 2px solid var(--mud-palette-primary); cursor:pointer;" : "cursor:pointer;")"
+         Class="rounded-xl"
+         @onclick="HandleSelect">
+    <MudCardContent>
+        <div class="d-flex justify-space-between align-center mb-1">
+            <MudText Typo="Typo.subtitle1" Class="font-weight-bold">@Service.Name</MudText>
+            @if (IsSelected)
+            {
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Primary" Size="Size.Small" />
+            }
+        </div>
+        @if (!string.IsNullOrEmpty(Service.Description))
+        {
+            <MudText Typo="Typo.body2" Class="opacity-70 mb-2">@Service.Description</MudText>
+        }
+        <div class="d-flex gap-3">
+            <MudChip T="string" Size="Size.Small" Color="Color.Default" Icon="@Icons.Material.Filled.Schedule">
+                @Service.DurationInMinutes min
+            </MudChip>
+            <MudChip T="string" Size="Size.Small" Color="Color.Primary">
+                R$ @Service.Price.ToString("F2")
+            </MudChip>
+        </div>
+    </MudCardContent>
+</MudCard>

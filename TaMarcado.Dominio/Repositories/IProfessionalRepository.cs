@@ -9,4 +9,6 @@ public interface IProfessionalRepository
     Task AddAsync(Professional professional);
     Task<Professional?> GetByUserIdWithCategoryAsync(string userId);
     Task<Guid?> GetIdByUserIdAsync(string userId);
+    Task<Professional?> GetBySlugAsync(string slug);
+    Task<List<Professional>> GetAllActiveWithCategoryAsync();
 }

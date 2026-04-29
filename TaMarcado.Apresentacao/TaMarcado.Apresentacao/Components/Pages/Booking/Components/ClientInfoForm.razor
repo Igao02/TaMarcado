@@ -1,0 +1,53 @@
+@inherits ClientInfoFormBase
+
+<MudPaper Elevation="1" Class="pa-4 rounded-xl">
+    <EditForm Model="Model" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+
+        <MudTextField @bind-Value="Model.ClientName"
+                      Label="Nome completo"
+                      Variant="Variant.Outlined"
+                      FullWidth="true"
+                      Class="mb-3"
+                      For="@(() => Model.ClientName)"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Person"
+                      AdornmentColor="Color.Primary" />
+
+        <MudTextField @bind-Value="Model.ClientPhone"
+                      Label="Telefone / WhatsApp"
+                      Variant="Variant.Outlined"
+                      FullWidth="true"
+                      Class="mb-3"
+                      For="@(() => Model.ClientPhone)"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Phone"
+                      AdornmentColor="Color.Primary" />
+
+        <MudTextField @bind-Value="Model.ClientEmail"
+                      Label="E-mail (opcional)"
+                      InputType="InputType.Email"
+                      Variant="Variant.Outlined"
+                      FullWidth="true"
+                      Class="mb-4"
+                      For="@(() => Model.ClientEmail)"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Email"
+                      AdornmentColor="Color.Primary" />
+
+        <MudButton ButtonType="ButtonType.Submit"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   FullWidth="true"
+                   Size="Size.Large"
+                   Disabled="IsLoading"
+                   Class="rounded-pill font-weight-bold"
+                   Style="height: 48px;">
+            @if (IsLoading)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" Color="Color.Inherit" />
+            }
+            Confirmar agendamento
+        </MudButton>
+    </EditForm>
+</MudPaper>

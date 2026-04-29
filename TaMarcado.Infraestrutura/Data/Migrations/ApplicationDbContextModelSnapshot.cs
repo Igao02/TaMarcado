@@ -289,6 +289,10 @@ namespace TaMarcado.Infraestrutura.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -311,6 +315,8 @@ namespace TaMarcado.Infraestrutura.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("ProfessionalId");
 
@@ -740,6 +746,12 @@ namespace TaMarcado.Infraestrutura.Migrations
 
             modelBuilder.Entity("TaMarcado.Dominio.Entities.Client", b =>
                 {
+                    b.HasOne("TaMarcado.Infraestrutura.Data.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("TaMarcado.Dominio.Entities.Professional", "Professional")
                         .WithMany()
                         .HasForeignKey("ProfessionalId")
