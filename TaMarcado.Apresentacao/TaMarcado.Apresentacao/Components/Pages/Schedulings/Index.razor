@@ -1,0 +1,105 @@
+@page "/agendamentos"
+@rendermode InteractiveServer
+@attribute [Authorize]
+@inherits SchedulingsPageBase
+
+<PageTitle>Agendamentos — TaMarcado</PageTitle>
+
+<MudText Typo="Typo.h5" Style="margin-top: 20px;" Class="font-weight-bold mb-4">Agendamentos</MudText>
+
+@if (_errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="mb-4 rounded-xl" Dense="true">
+        @_errorMessage
+    </MudAlert>
+}
+
+@if (_isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-4" />
+}
+else
+{
+    <MudChipSet T="string" @bind-SelectedValue="_statusFilter" SelectionMode="SelectionMode.SingleSelection" Class="mb-4">
+        <MudChip T="string" Value="@((string?)null)" Variant="Variant.Outlined" Color="Color.Default">Todos</MudChip>
+        <MudChip T="string" Value="@("Pendent")" Variant="Variant.Outlined" Color="Color.Warning">Pendente</MudChip>
+        <MudChip T="string" Value="@("Confirmed")" Variant="Variant.Outlined" Color="Color.Success">Confirmado</MudChip>
+        <MudChip T="string" Value="@("Concluded")" Variant="Variant.Outlined" Color="Color.Default">Concluído</MudChip>
+        <MudChip T="string" Value="@("Canceled")" Variant="Variant.Outlined" Color="Color.Error">Cancelado</MudChip>
+    </MudChipSet>
+
+    @if (!FilteredSchedulings.Any())
+    {
+        <MudPaper Class="pa-8" Elevation="1" Style="border-radius: 16px; text-align: center;">
+            <MudIcon Icon="@Icons.Material.Filled.EventBusy" Size="Size.Large" Color="Color.Secondary" Class="mb-3" />
+            <MudText Typo="Typo.h6" Color="Color.Secondary">Nenhum agendamento encontrado</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">
+                Os agendamentos feitos pelos clientes aparecerão aqui.
+            </MudText>
+        </MudPaper>
+    }
+    else
+    {
+        <MudPaper Elevation="1" Style="border-radius: 16px; overflow: hidden;">
+            <MudTable Items="FilteredSchedulings" Hover="true" Dense="true" Elevation="0">
+                <HeaderContent>
+                    <MudTh>Cliente</MudTh>
+                    <MudTh>Serviço</MudTh>
+                    <MudTh>Data / Hora</MudTh>
+                    <MudTh>Status</MudTh>
+                    <MudTh>Valor</MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Cliente">
+                        <MudText Typo="Typo.body2" Class="font-weight-medium">@context.ClientName</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Serviço">@context.ServiceName</MudTd>
+                    <MudTd DataLabel="Data / Hora">
+                        <MudText Typo="Typo.body2">@context.InitDate.ToString("dd/MM/yyyy")</MudText>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                            @context.InitDate.ToString("HH:mm") – @context.EndDate.ToString("HH:mm")
+                        </MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Status">
+                        <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(context.Status)" Variant="Variant.Filled">
+                            @context.StatusLabel
+                        </MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Valor">@context.Price.ToString("C2")</MudTd>
+                    <MudTd>
+                        <div class="d-flex gap-1">
+                            @if (context.Status == "Pendent")
+                            {
+                                <MudTooltip Text="Confirmar">
+                                    <MudIconButton Icon="@Icons.Material.Filled.CheckCircle"
+                                                   Color="Color.Success" Size="Size.Small"
+                                                   OnClick="@(() => HandleConfirm(context.Id))"
+                                                   Disabled="_processingId == context.Id" />
+                                </MudTooltip>
+                            }
+                            @if (context.Status == "Confirmed")
+                            {
+                                <MudTooltip Text="Concluir">
+                                    <MudIconButton Icon="@Icons.Material.Filled.TaskAlt"
+                                                   Color="Color.Primary" Size="Size.Small"
+                                                   OnClick="@(() => HandleConclude(context.Id))"
+                                                   Disabled="_processingId == context.Id" />
+                                </MudTooltip>
+                            }
+                            @if (context.Status == "Pendent" || context.Status == "Confirmed")
+                            {
+                                <MudTooltip Text="Cancelar">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Cancel"
+                                                   Color="Color.Error" Size="Size.Small"
+                                                   OnClick="@(() => HandleCancel(context.Id))"
+                                                   Disabled="_processingId == context.Id" />
+                                </MudTooltip>
+                            }
+                        </div>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
+    }
+}

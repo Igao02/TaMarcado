@@ -1,0 +1,3 @@
+namespace TaMarcado.Aplicacao.UseCases.Schedulings.GetSchedulingsByProfessional;
+
+public record GetSchedulingsByProfessionalCommand(Guid ProfessionalId);

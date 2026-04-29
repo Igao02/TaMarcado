@@ -18,6 +18,10 @@ using TaMarcado.Aplicacao.UseCases.Booking.GetPublicProfile;
 using TaMarcado.Aplicacao.UseCases.Booking.GetAvailableSlots;
 using TaMarcado.Aplicacao.UseCases.Booking.CreateScheduling;
 using TaMarcado.Aplicacao.UseCases.Booking.GetPublicProfessionals;
+using TaMarcado.Aplicacao.UseCases.Schedulings.GetSchedulingsByProfessional;
+using TaMarcado.Aplicacao.UseCases.Schedulings.ConfirmScheduling;
+using TaMarcado.Aplicacao.UseCases.Schedulings.CancelScheduling;
+using TaMarcado.Aplicacao.UseCases.Schedulings.ConcludeScheduling;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,6 +78,10 @@ builder.Services.AddScoped<GetPublicProfileHandler>();
 builder.Services.AddScoped<GetAvailableSlotsHandler>();
 builder.Services.AddScoped<CreateSchedulingHandler>();
 builder.Services.AddScoped<GetPublicProfessionalsHandler>();
+builder.Services.AddScoped<GetSchedulingsByProfessionalHandler>();
+builder.Services.AddScoped<ConfirmSchedulingHandler>();
+builder.Services.AddScoped<CancelSchedulingHandler>();
+builder.Services.AddScoped<ConcludeSchedulingHandler>();
 builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 
 var app = builder.Build();
