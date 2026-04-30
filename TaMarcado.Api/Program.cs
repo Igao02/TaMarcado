@@ -29,6 +29,8 @@ using TaMarcado.Aplicacao.UseCases.Schedulings.CancelSchedulingByClient;
 using TaMarcado.Aplicacao.UseCases.Payments.GetPaymentByScheduling;
 using TaMarcado.Aplicacao.UseCases.Payments.ConfirmPayment;
 using TaMarcado.Aplicacao.UseCases.Payments.GetClientPayment;
+using TaMarcado.Infraestrutura.Services;
+using TaMarcado.Api.BackgroundServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,6 +90,9 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<GetPaymentBySchedulingHandler>();
 builder.Services.AddScoped<ConfirmPaymentHandler>();
 builder.Services.AddScoped<GetClientPaymentHandler>();
+builder.Services.AddScoped<INotificationSchedulingRepository, NotificationSchedulingRepository>();
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+builder.Services.AddHostedService<NotificationBackgroundService>();
 builder.Services.AddScoped<ISchedulingRepository, SchedulingRepository>();
 builder.Services.AddScoped<GetPublicProfileHandler>();
 builder.Services.AddScoped<GetAvailableSlotsHandler>();

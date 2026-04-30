@@ -10,7 +10,8 @@ public class CreateSchedulingHandler(
     IServiceRepository serviceRepository,
     ISchedulingRepository schedulingRepository,
     IClientRepository clientRepository,
-    IPaymentRepository paymentRepository)
+    IPaymentRepository paymentRepository,
+    INotificationSchedulingRepository notificationRepository)
 {
     public async Task<Result<CreateSchedulingResponse>> Handle(CreateSchedulingCommand command)
     {
@@ -68,6 +69,35 @@ public class CreateSchedulingHandler(
                 Scheduling = scheduling
             };
             await paymentRepository.AddAsync(payment);
+
+            var notifications = new List<NotificationScheduling>
+            {
+                new NotificationScheduling
+                {
+                    SchedulingId = scheduling.Id,
+                    SchedulingType = SchedulingTypeEnum.Confirmed,
+                    StatusNotification = StatusNotificationScheduling.Pending,
+                    DateScheduling = DateTime.Now,
+                    Scheduling = scheduling
+                },
+                new NotificationScheduling
+                {
+                    SchedulingId = scheduling.Id,
+                    SchedulingType = SchedulingTypeEnum.TweentyFourHoursReminder,
+                    StatusNotification = StatusNotificationScheduling.Pending,
+                    DateScheduling = initDate.AddHours(-24),
+                    Scheduling = scheduling
+                },
+                new NotificationScheduling
+                {
+                    SchedulingId = scheduling.Id,
+                    SchedulingType = SchedulingTypeEnum.OneHourReminder,
+                    StatusNotification = StatusNotificationScheduling.Pending,
+                    DateScheduling = initDate.AddHours(-1),
+                    Scheduling = scheduling
+                },
+            };
+            await notificationRepository.AddRangeAsync(notifications);
 
             return Result.Success(new CreateSchedulingResponse(scheduling.Id));
         }
