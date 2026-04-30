@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @attribute [Authorize]
 @inherits SchedulingsPageBase
+@using TaMarcado.Apresentacao.Components.Pages.Schedulings.Components
 
 <PageTitle>Agendamentos — TaMarcado</PageTitle>
 
@@ -47,8 +48,10 @@ else
                     <MudTh>Serviço</MudTh>
                     <MudTh>Data / Hora</MudTh>
                     <MudTh>Status</MudTh>
+                    <MudTh>Pagamento</MudTh>
                     <MudTh>Valor</MudTh>
-                    <MudTh></MudTh>
+                    <MudTh>pix</MudTh>
+                    <MudTh>Ações</MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="Cliente">
@@ -66,40 +69,68 @@ else
                             @context.StatusLabel
                         </MudChip>
                     </MudTd>
+                    <MudTd DataLabel="Pagamento">
+                        @if (context.PaymentStatus is not null)
+                        {
+                            <MudChip T="string" Size="Size.Small"
+                                     Color="@(context.PaymentStatus == "Paid" ? Color.Success : Color.Warning)"
+                                     Variant="Variant.Outlined">
+                                @context.PaymentStatusLabel
+                            </MudChip>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">—</MudText>
+                        }
+                    </MudTd>
                     <MudTd DataLabel="Valor">@context.Price.ToString("C2")</MudTd>
                     <MudTd>
-                        <div class="d-flex gap-1">
-                            @if (context.Status == "Pendent")
-                            {
-                                <MudTooltip Text="Confirmar">
-                                    <MudIconButton Icon="@Icons.Material.Filled.CheckCircle"
-                                                   Color="Color.Success" Size="Size.Small"
-                                                   OnClick="@(() => HandleConfirm(context.Id))"
-                                                   Disabled="_processingId == context.Id" />
-                                </MudTooltip>
-                            }
-                            @if (context.Status == "Confirmed")
-                            {
-                                <MudTooltip Text="Concluir">
-                                    <MudIconButton Icon="@Icons.Material.Filled.TaskAlt"
-                                                   Color="Color.Primary" Size="Size.Small"
-                                                   OnClick="@(() => HandleConclude(context.Id))"
-                                                   Disabled="_processingId == context.Id" />
-                                </MudTooltip>
-                            }
-                            @if (context.Status == "Pendent" || context.Status == "Confirmed")
-                            {
-                                <MudTooltip Text="Cancelar">
-                                    <MudIconButton Icon="@Icons.Material.Filled.Cancel"
-                                                   Color="Color.Error" Size="Size.Small"
-                                                   OnClick="@(() => HandleCancel(context.Id))"
-                                                   Disabled="_processingId == context.Id" />
-                                </MudTooltip>
-                            }
-                        </div>
+                        <MudTooltip Text="Ver PIX">
+                            <MudIconButton Icon="@Icons.Material.Filled.Pix"
+                                           Color="Color.Primary" Size="Size.Small"
+                                           OnClick="@(() => OpenPaymentDialog(context))" />
+                        </MudTooltip>
+                    </MudTd>
+                    <MudTd>
+                        @if (context.Status == "Pendent")
+                        {
+                            <MudTooltip Text="Confirmar">
+                                <MudIconButton Icon="@Icons.Material.Filled.CheckCircle"
+                                               Color="Color.Success" Size="Size.Small"
+                                               OnClick="@(() => HandleConfirm(context.Id))"
+                                               Disabled="_processingId == context.Id" />
+                            </MudTooltip>
+                        }
+                        @if (context.Status == "Confirmed")
+                        {
+                            <MudTooltip Text="Concluir">
+                                <MudIconButton Icon="@Icons.Material.Filled.TaskAlt"
+                                               Color="Color.Primary" Size="Size.Small"
+                                               OnClick="@(() => HandleConclude(context.Id))"
+                                               Disabled="_processingId == context.Id" />
+                            </MudTooltip>
+                        }
+                        @if (context.Status == "Pendent" || context.Status == "Confirmed")
+                        {
+                            <MudTooltip Text="Cancelar">
+                                <MudIconButton Icon="@Icons.Material.Filled.Cancel"
+                                               Color="Color.Error" Size="Size.Small"
+                                               OnClick="@(() => HandleCancel(context.Id))"
+                                               Disabled="_processingId == context.Id" />
+                            </MudTooltip>
+                        }
                     </MudTd>
                 </RowTemplate>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }" />
+                </PagerContent>
             </MudTable>
         </MudPaper>
     }
 }
+
+<PaymentDialog Visible="@_paymentDialogOpen"
+               VisibleChanged="HandlePaymentDialogVisibleChanged"
+               SchedulingId="_selectedSchedulingId"
+               ClientName="@_selectedClientName"
+               OnPaymentConfirmed="LoadSchedulings" />

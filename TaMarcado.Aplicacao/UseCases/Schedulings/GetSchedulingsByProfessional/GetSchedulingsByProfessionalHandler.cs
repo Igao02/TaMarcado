@@ -18,7 +18,9 @@ public class GetSchedulingsByProfessionalHandler(ISchedulingRepository schedulin
                 s.InitDate,
                 s.EndDate,
                 s.Status.ToString(),
-                s.Price)).ToList();
+                s.Price,
+                s.Payment?.StatusPayment.ToString(),
+                s.Payment?.Id)).ToList();
 
             return Result.Success(new GetSchedulingsByProfessionalResponse(items));
         }

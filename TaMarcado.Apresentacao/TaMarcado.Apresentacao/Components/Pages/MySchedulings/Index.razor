@@ -2,54 +2,151 @@
 @rendermode InteractiveServer
 @attribute [Authorize]
 @inherits MySchedulingsPageBase
+@using TaMarcado.Apresentacao.Components.Pages.Schedulings.Components
 
-<PageTitle>Encontre seu profissional — TaMarcado</PageTitle>
+<PageTitle>Meus Agendamentos — TaMarcado</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
-    <MudText Typo="Typo.h5" Class="font-weight-bold mb-4">Encontre seu profissional</MudText>
+    <MudTabs ActivePanelIndex="_activeTab" ActivePanelIndexChanged="OnTabChanged" Elevation="0" Rounded="true" ApplyEffectsToContainer="true" Class="mb-4">
 
-    @if (IsLoading)
-    {
-        <div class="d-flex justify-center mt-8">
-            <MudProgressCircular Indeterminate Color="Color.Primary" />
-        </div>
-    }
-    else
-    {
-        <MudTextField @bind-Value="SearchText"
-                      Placeholder="Buscar por nome..."
-                      Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Filled.Search"
-                      Immediate="true"
-                      Variant="Variant.Outlined"
-                      Class="mb-3" />
+        <MudTabPanel Text="Encontrar Profissional" Icon="@Icons.Material.Filled.Search">
+            <MudText Typo="Typo.h5" Class="font-weight-bold mb-4 mt-4">Encontre seu profissional</MudText>
 
-        <MudChipSet T="string" @bind-SelectedValue="SelectedCategory" SelectionMode="SelectionMode.SingleSelection" Class="mb-4">
-            <MudChip T="string" Value="@((string?)null)" Variant="Variant.Outlined" Color="Color.Default">Todos</MudChip>
-            @foreach (var cat in Categories)
+            @if (IsLoading)
             {
-                <MudChip T="string" Value="@cat" Variant="Variant.Outlined" Color="Color.Primary">@cat</MudChip>
+                <div class="d-flex justify-center mt-8">
+                    <MudProgressCircular Indeterminate Color="Color.Primary" />
+                </div>
             }
-        </MudChipSet>
+            else
+            {
+                <MudTextField @bind-Value="SearchText"
+                              Placeholder="Buscar por nome..."
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Immediate="true"
+                              Variant="Variant.Outlined"
+                              Class="mb-3" />
 
-        @if (FilteredProfessionals.Any())
-        {
-            <MudGrid>
-                @foreach (var p in FilteredProfessionals)
+                <MudChipSet T="string" @bind-SelectedValue="SelectedCategory" SelectionMode="SelectionMode.SingleSelection" Class="mb-4">
+                    <MudChip T="string" Value="@((string?)null)" Variant="Variant.Outlined" Color="Color.Default">Todos</MudChip>
+                    @foreach (var cat in Categories)
+                    {
+                        <MudChip T="string" Value="@cat" Variant="Variant.Outlined" Color="Color.Primary">@cat</MudChip>
+                    }
+                </MudChipSet>
+
+                @if (FilteredProfessionals.Any())
                 {
-                    <MudItem xs="12" sm="6" md="4">
-                        <ProfessionalCard Professional="p" OnSelect="NavigateToBooking" />
-                    </MudItem>
+                    <MudGrid>
+                        @foreach (var p in FilteredProfessionals)
+                        {
+                            <MudItem xs="12" sm="6" md="4">
+                                <ProfessionalCard Professional="p" OnSelect="NavigateToBooking" />
+                            </MudItem>
+                        }
+                    </MudGrid>
                 }
-            </MudGrid>
-        }
-        else
-        {
-            <MudPaper Elevation="1" Class="pa-8 rounded-xl text-center mt-4">
-                <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Color="Color.Default" Class="mb-3" />
-                <MudText Typo="Typo.h6" Class="mb-2">Nenhum profissional encontrado</MudText>
-                <MudText Typo="Typo.body2" Class="mud-text-secondary">Tente outro filtro ou nome.</MudText>
-            </MudPaper>
-        }
-    }
+                else
+                {
+                    <MudPaper Elevation="1" Class="pa-8 rounded-xl text-center mt-4">
+                        <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Color="Color.Default" Class="mb-3" />
+                        <MudText Typo="Typo.h6" Class="mb-2">Nenhum profissional encontrado</MudText>
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary">Tente outro filtro ou nome.</MudText>
+                    </MudPaper>
+                }
+            }
+        </MudTabPanel>
+
+        <MudTabPanel Text="Meus Agendamentos" Icon="@Icons.Material.Filled.CalendarMonth">
+            <MudText Typo="Typo.h5" Class="font-weight-bold mb-4 mt-4">Meus Agendamentos</MudText>
+
+            @if (_schedulingError is not null)
+            {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="mb-4 rounded-xl" Dense="true">
+                    @_schedulingError
+                </MudAlert>
+            }
+
+            @if (_isLoadingSchedulings)
+            {
+                <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-4" />
+            }
+            else if (_clientSchedulings.Count == 0)
+            {
+                <MudPaper Class="pa-8" Elevation="1" Style="border-radius: 16px; text-align: center;">
+                    <MudIcon Icon="@Icons.Material.Filled.EventBusy" Size="Size.Large" Color="Color.Secondary" Class="mb-3" />
+                    <MudText Typo="Typo.h6" Color="Color.Secondary">Nenhum agendamento ainda</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">Encontre um profissional e faça seu primeiro agendamento</MudText>
+                </MudPaper>
+            }
+            else
+            {
+                <MudTable Items="_clientSchedulings" Hover="true" Elevation="1" Style="border-radius: 16px;">
+                    <HeaderContent>
+                        <MudTh>Profissional</MudTh>
+                        <MudTh>Serviço</MudTh>
+                        <MudTh>Data</MudTh>
+                        <MudTh>Horário</MudTh>
+                        <MudTh>Status</MudTh>
+                        <MudTh>Pagamento</MudTh>
+                        <MudTh>Valor</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Profissional"><MudText Typo="Typo.body1" Class="font-weight-medium">@context.ProfessionalName</MudText></MudTd>
+                        <MudTd DataLabel="Serviço">@context.ServiceName</MudTd>
+                        <MudTd DataLabel="Data">@context.InitDate.ToString("dd/MM/yyyy")</MudTd>
+                        <MudTd DataLabel="Horário">@context.InitDate.ToString("HH:mm") – @context.EndDate.ToString("HH:mm")</MudTd>
+                        <MudTd DataLabel="Status">
+                            <MudChip T="string" Color="@StatusColor(context.Status)" Size="Size.Small" Variant="Variant.Filled">
+                                @context.StatusLabel
+                            </MudChip>
+                        </MudTd>
+                        <MudTd DataLabel="Pagamento">
+                            @if (context.PaymentStatus is not null)
+                            {
+                                <MudChip T="string" Size="Size.Small"
+                                         Color="@(context.PaymentStatus == "Paid" ? Color.Success : Color.Warning)"
+                                         Variant="Variant.Outlined">
+                                    @context.PaymentStatusLabel
+                                </MudChip>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">—</MudText>
+                            }
+                        </MudTd>
+                        <MudTd DataLabel="Valor">R$ @context.Price.ToString("N2")</MudTd>
+                        <MudTd>
+                            <div class="d-flex gap-1 align-center">
+                                <MudTooltip Text="Ver PIX">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Pix"
+                                                   Color="Color.Primary" Size="Size.Small"
+                                                   OnClick="@(() => OpenClientPaymentDialog(context))" />
+                                </MudTooltip>
+                                <MudTooltip Text="Cancelar agendamento" Disabled="!context.CanCancel">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Cancel"
+                                                   Color="Color.Error" Size="Size.Small"
+                                                   Disabled="@(!context.CanCancel || _cancelingId == context.Id)"
+                                                   OnClick="@(() => HandleCancelScheduling(context.Id))" />
+                                </MudTooltip>
+                            </div>
+                        </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }" />
+                    </PagerContent>
+                </MudTable>
+            }
+        </MudTabPanel>
+
+    </MudTabs>
 </MudContainer>
+
+<PaymentDialog Visible="@_paymentDialogOpen"
+               VisibleChanged="HandlePaymentDialogVisibleChanged"
+               SchedulingId="_selectedSchedulingId"
+               ClientName="@_selectedProfessionalName"
+               IsClientView="true"
+               OnPaymentConfirmed="LoadClientSchedulings" />

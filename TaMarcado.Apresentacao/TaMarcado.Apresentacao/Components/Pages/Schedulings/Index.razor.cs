@@ -13,6 +13,9 @@ public class SchedulingsPageBase : ComponentBase
     protected bool _isLoading = true;
     protected string? _statusFilter;
     protected Guid? _processingId;
+    protected bool _paymentDialogOpen;
+    protected Guid _selectedSchedulingId;
+    protected string _selectedClientName = string.Empty;
 
     [Inject] protected SchedulingHandler Handler { get; set; } = default!;
     [Inject] protected ISnackbar Snackbar { get; set; } = default!;
@@ -117,6 +120,19 @@ public class SchedulingsPageBase : ComponentBase
             _processingId = null;
             StateHasChanged();
         }
+    }
+
+    protected void OpenPaymentDialog(SchedulingHandler.SchedulingItem item)
+    {
+        _selectedSchedulingId = item.Id;
+        _selectedClientName = item.ClientName;
+        _paymentDialogOpen = true;
+    }
+
+    protected async Task HandlePaymentDialogVisibleChanged(bool value)
+    {
+        _paymentDialogOpen = value;
+        await Task.CompletedTask;
     }
 
     protected static Color GetStatusColor(string status) => status switch

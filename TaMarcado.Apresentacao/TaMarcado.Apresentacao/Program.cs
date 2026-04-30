@@ -8,6 +8,8 @@ using TaMarcado.Apresentacao.Handlers.Service;
 using TaMarcado.Apresentacao.Handlers.AvaliableTime;
 using TaMarcado.Apresentacao.Handlers.Booking;
 using TaMarcado.Apresentacao.Handlers.Scheduling;
+using TaMarcado.Apresentacao.Handlers.Client;
+using TaMarcado.Apresentacao.Handlers.Payment;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +41,8 @@ builder.Services.AddScoped<ServiceHandler>();
 builder.Services.AddScoped<AvaliableTimeHandler>();
 builder.Services.AddScoped<BookingHandler>();
 builder.Services.AddScoped<SchedulingHandler>();
+builder.Services.AddScoped<ClientHandler>();
+builder.Services.AddScoped<PaymentHandler>();
 
 var app = builder.Build();
 

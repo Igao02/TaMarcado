@@ -1,0 +1,73 @@
+@inherits PaymentDialogBase
+
+<MudDialog Visible="Visible" VisibleChanged="HandleVisibleChanged" Options="_dialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Pagamento PIX — @ClientName</MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (_isLoading)
+        {
+            <div class="d-flex justify-center pa-4">
+                <MudProgressCircular Indeterminate Color="Color.Primary" />
+            </div>
+        }
+        else if (_error is not null)
+        {
+            <MudAlert Severity="Severity.Error" Dense="true">@_error</MudAlert>
+        }
+        else if (_payment is not null)
+        {
+            <div class="d-flex flex-column align-center gap-4">
+
+                <MudChip T="string"
+                         Color="@(_payment.IsPending ? Color.Warning : Color.Success)"
+                         Variant="Variant.Filled"
+                         Size="Size.Medium">
+                    @_payment.StatusLabel
+                </MudChip>
+
+                @if (_payment.DatePayment.HasValue)
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Pago em @_payment.DatePayment.Value.ToString("dd/MM/yyyy HH:mm")
+                    </MudText>
+                }
+
+                @if (!string.IsNullOrEmpty(_payment.QrCodeBase64))
+                {
+                    <img src="data:image/png;base64,@_payment.QrCodeBase64"
+                         alt="QR Code PIX"
+                         style="width: 200px; height: 200px; border-radius: 8px;" />
+                }
+
+                <MudTextField Value="_payment.PixPayload"
+                              Label="Copia e Cola"
+                              Variant="Variant.Outlined"
+                              FullWidth="true"
+                              ReadOnly="true"
+                              Lines="3"
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@Icons.Material.Filled.ContentCopy"
+                              OnAdornmentClick="CopyPayload" />
+
+            </div>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="CloseDialog">Fechar</MudButton>
+        @if (_payment?.IsPending == true && !IsClientView)
+        {
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Success"
+                       Disabled="_isConfirming"
+                       OnClick="HandleConfirmPayment"
+                       Class="rounded-pill">
+                @if (_isConfirming)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate Color="Color.Inherit" Class="mr-2" />
+                }
+                Marcar como Pago
+            </MudButton>
+        }
+    </DialogActions>
+</MudDialog>
