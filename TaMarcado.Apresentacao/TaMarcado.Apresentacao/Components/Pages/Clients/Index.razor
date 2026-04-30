@@ -1,0 +1,77 @@
+@page "/clientes"
+@rendermode InteractiveServer
+@inherits ClientsPageBase
+@attribute [Authorize(Roles = "Profissional")]
+@using TaMarcado.Apresentacao.Components.Pages.Clients.Components
+
+<PageTitle>Clientes — TaMarcado</PageTitle>
+
+<MudText Typo="Typo.h5" Style="margin-top: 20px;" Class="font-weight-bold mb-6">Meus Clientes</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="mb-4 rounded-xl" Dense="true">
+        @errorMessage
+    </MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-4" />
+}
+else if (clients.Count == 0)
+{
+    <MudPaper Class="pa-8" Elevation="1" Style="border-radius: 16px; text-align: center;">
+        <MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Large" Color="Color.Secondary" Class="mb-3" />
+        <MudText Typo="Typo.h6" Color="Color.Secondary">Nenhum cliente ainda</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">Os clientes aparecem aqui após fazerem o primeiro agendamento</MudText>
+    </MudPaper>
+}
+else
+{
+    <MudTable Items="clients" Hover="true" Elevation="1" Style="border-radius: 16px;" Dense="false">
+        <HeaderContent>
+            <MudTh>Nome</MudTh>
+            <MudTh>Telefone</MudTh>
+            <MudTh>E-mail</MudTh>
+            <MudTh>Observações</MudTh>
+            <MudTh>Desde</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Nome"><MudText Typo="Typo.body1" Class="font-weight-medium">@context.Name</MudText></MudTd>
+            <MudTd DataLabel="Telefone">@context.Phone</MudTd>
+            <MudTd DataLabel="E-mail">@(context.Email ?? "—")</MudTd>
+            <MudTd DataLabel="Observações">
+                @if (string.IsNullOrWhiteSpace(context.Observations))
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">—</MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@context.Observations</MudText>
+                }
+            </MudTd>
+            <MudTd DataLabel="Desde">@context.CreatedAt.ToString("dd/MM/yyyy")</MudTd>
+            <MudTd>
+                <MudTooltip Text="Editar observações">
+                    <MudIconButton Icon="@Icons.Material.Filled.EditNote"
+                                   Size="Size.Small"
+                                   Color="Color.Primary"
+                                   OnClick="@(() => OpenEditDialog(context))" />
+                </MudTooltip>
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }" />
+        </PagerContent>
+    </MudTable>
+}
+
+@if (selectedClient is not null)
+{
+    <ClientObservationsDialog Visible="dialogOpen"
+                              VisibleChanged="HandleDialogVisibleChanged"
+                              Client="selectedClient"
+                              OnSaved="LoadClients" />
+}

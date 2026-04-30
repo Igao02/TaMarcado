@@ -128,6 +128,8 @@ public class SchedulingHandler(IHttpClientFactory httpClientFactory)
         [JsonPropertyName("endDate")] public DateTime EndDate { get; set; }
         [JsonPropertyName("status")] public string Status { get; set; } = string.Empty;
         [JsonPropertyName("price")] public decimal Price { get; set; }
+        [JsonPropertyName("paymentStatus")] public string? PaymentStatus { get; set; }
+        [JsonPropertyName("paymentId")] public Guid? PaymentId { get; set; }
 
         public string StatusLabel => Status switch
         {
@@ -137,6 +139,84 @@ public class SchedulingHandler(IHttpClientFactory httpClientFactory)
             "Concluded" => "Concluído",
             _ => Status
         };
+
+        public string PaymentStatusLabel => PaymentStatus switch
+        {
+            "Pending" => "Pendente",
+            "Paid" => "Pago",
+            _ => "—"
+        };
+    }
+
+    public async Task<SchedulingResult<List<ClientSchedulingItem>>> GetClientSchedulingsAsync(string userEmail)
+    {
+        try
+        {
+            var client = httpClientFactory.CreateClient("ApiBack");
+            var response = await client.GetAsync($"/api/client/schedulings?email={Uri.EscapeDataString(userEmail)}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var items = JsonSerializer.Deserialize<List<ClientSchedulingItem>>(content, JsonOptions) ?? [];
+                return new SchedulingResult<List<ClientSchedulingItem>> { Success = true, Data = items };
+            }
+
+            return new SchedulingResult<List<ClientSchedulingItem>> { Success = false, Error = await ExtractError(response) };
+        }
+        catch (Exception ex)
+        {
+            return new SchedulingResult<List<ClientSchedulingItem>> { Success = false, Error = $"Erro inesperado: {ex.Message}" };
+        }
+    }
+
+    public async Task<SchedulingResult> CancelClientSchedulingAsync(Guid id, string userEmail)
+    {
+        try
+        {
+            var client = httpClientFactory.CreateClient("ApiBack");
+            var response = await client.PutAsync(
+                $"/api/client/schedulings/{id}/cancel?email={Uri.EscapeDataString(userEmail)}", null);
+
+            if (response.IsSuccessStatusCode)
+                return new SchedulingResult { Success = true };
+
+            return new SchedulingResult { Success = false, Error = await ExtractError(response) };
+        }
+        catch (Exception ex)
+        {
+            return new SchedulingResult { Success = false, Error = $"Erro inesperado: {ex.Message}" };
+        }
+    }
+
+    public class ClientSchedulingItem
+    {
+        [JsonPropertyName("id")] public Guid Id { get; set; }
+        [JsonPropertyName("professionalName")] public string ProfessionalName { get; set; } = string.Empty;
+        [JsonPropertyName("serviceName")] public string ServiceName { get; set; } = string.Empty;
+        [JsonPropertyName("initDate")] public DateTime InitDate { get; set; }
+        [JsonPropertyName("endDate")] public DateTime EndDate { get; set; }
+        [JsonPropertyName("status")] public string Status { get; set; } = string.Empty;
+        [JsonPropertyName("price")] public decimal Price { get; set; }
+        [JsonPropertyName("paymentStatus")] public string? PaymentStatus { get; set; }
+
+        public string StatusLabel => Status switch
+        {
+            "Pendent" => "Pendente",
+            "Confirmed" => "Confirmado",
+            "Canceled" => "Cancelado",
+            "Concluded" => "Concluído",
+            _ => Status
+        };
+
+        public string PaymentStatusLabel => PaymentStatus switch
+        {
+            "Pending" => "Pendente",
+            "Paid" => "Pago",
+            _ => "—"
+        };
+
+        public bool CanCancel => Status is "Pendent" or "Confirmed";
     }
 
     private class SchedulingsApiResponse

@@ -3,12 +3,14 @@ using TaMarcado.Dominio.Entities;
 using TaMarcado.Dominio.Enum;
 using TaMarcado.Dominio.Repositories;
 
+
 namespace TaMarcado.Aplicacao.UseCases.Booking.CreateScheduling;
 
 public class CreateSchedulingHandler(
     IServiceRepository serviceRepository,
     ISchedulingRepository schedulingRepository,
-    IClientRepository clientRepository)
+    IClientRepository clientRepository,
+    IPaymentRepository paymentRepository)
 {
     public async Task<Result<CreateSchedulingResponse>> Handle(CreateSchedulingCommand command)
     {
@@ -60,6 +62,12 @@ public class CreateSchedulingHandler(
                 DateTime.Now);
 
             await schedulingRepository.AddAsync(scheduling);
+
+            var payment = new Payment(scheduling.Id, StatusPaymentEnum.Pending, proofUrl: null, datePayment: null, DateTime.Now)
+            {
+                Scheduling = scheduling
+            };
+            await paymentRepository.AddAsync(payment);
 
             return Result.Success(new CreateSchedulingResponse(scheduling.Id));
         }

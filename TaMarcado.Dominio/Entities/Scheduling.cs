@@ -23,6 +23,7 @@ public class Scheduling : Entity
     public virtual required Professional Professional { get; set; }
     public virtual required Service Service { get; set; }
     public virtual required Client Client { get; set; }
+    public virtual Payment? Payment { get; set; }
 
     [SetsRequiredMembers]
     public Scheduling(Guid professionalId, Guid serviceId, Guid clientId, DateTime initDate, DateTime endDate, StatusEnum status, decimal price, string? observation, DateTime createdAt)

@@ -9,4 +9,6 @@ public record SchedulingItem(
     DateTime InitDate,
     DateTime EndDate,
     string Status,
-    decimal Price);
+    decimal Price,
+    string? PaymentStatus,
+    Guid? PaymentId);

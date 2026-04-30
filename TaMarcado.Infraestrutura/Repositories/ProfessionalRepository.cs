@@ -40,4 +40,7 @@ public class ProfessionalRepository(ApplicationDbContext context) : IProfessiona
             .Where(p => p.Active)
             .OrderBy(p => p.ExibitionName)
             .ToListAsync();
+
+    public Task<Professional?> GetByIdAsync(Guid id) =>
+        context.Professional.FirstOrDefaultAsync(p => p.Id == id);
 }

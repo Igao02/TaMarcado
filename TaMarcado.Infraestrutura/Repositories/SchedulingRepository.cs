@@ -27,6 +27,7 @@ public class SchedulingRepository(ApplicationDbContext context) : ISchedulingRep
         context.Scheduling
             .Include(s => s.Client)
             .Include(s => s.Service)
+            .Include(s => s.Payment)
             .Where(s => s.ProfessionalId == professionalId)
             .OrderByDescending(s => s.InitDate)
             .ToListAsync();
@@ -34,6 +35,21 @@ public class SchedulingRepository(ApplicationDbContext context) : ISchedulingRep
     public Task<Scheduling?> GetByIdAndProfessionalIdAsync(Guid id, Guid professionalId) =>
         context.Scheduling
             .FirstOrDefaultAsync(s => s.Id == id && s.ProfessionalId == professionalId);
+
+    public Task<List<Scheduling>> GetByClientUserIdWithDetailsAsync(string applicationUserId) =>
+        context.Scheduling
+            .Include(s => s.Client)
+            .Include(s => s.Service)
+            .Include(s => s.Professional)
+            .Include(s => s.Payment)
+            .Where(s => s.Client.ApplicationUserId == applicationUserId)
+            .OrderByDescending(s => s.InitDate)
+            .ToListAsync();
+
+    public Task<Scheduling?> GetByIdAndClientUserIdAsync(Guid id, string applicationUserId) =>
+        context.Scheduling
+            .Include(s => s.Client)
+            .FirstOrDefaultAsync(s => s.Id == id && s.Client.ApplicationUserId == applicationUserId);
 
     public async Task UpdateAsync(Scheduling scheduling)
     {

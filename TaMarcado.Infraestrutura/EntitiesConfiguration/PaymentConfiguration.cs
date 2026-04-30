@@ -31,7 +31,7 @@ internal class PaymentConfiguration : IEntityTypeConfiguration<Payment>
 
         builder
             .HasOne(p => p.Scheduling)
-            .WithOne()
+            .WithOne(s => s.Payment)
             .HasForeignKey<Payment>(p => p.SchedulingId)
             .OnDelete(DeleteBehavior.Cascade);
     }

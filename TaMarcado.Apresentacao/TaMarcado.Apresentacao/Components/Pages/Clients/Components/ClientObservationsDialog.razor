@@ -1,0 +1,34 @@
+@using TaMarcado.Apresentacao.Handlers.Client
+@inherits ClientObservationsDialogBase
+
+<MudDialog Visible="Visible" VisibleChanged="HandleVisibleChanged" Options="_dialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Observações — @Client.Name</MudText>
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model="_model" OnValidSubmit="HandleSave">
+            <DataAnnotationsValidator />
+            <MudTextField @bind-Value="_model.Observations"
+                          Label="Observações"
+                          Variant="Variant.Outlined"
+                          FullWidth="true"
+                          Lines="4"
+                          Placeholder="Anotações sobre o cliente..."
+                          For="@(() => _model.Observations)" />
+            <div class="d-flex justify-end gap-2 mt-4">
+                <MudButton Variant="Variant.Text" OnClick="CloseDialog" Disabled="_isSaving">Cancelar</MudButton>
+                <MudButton ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Disabled="_isSaving"
+                           Class="rounded-pill">
+                    @if (_isSaving)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" Color="Color.Inherit" />
+                    }
+                    Salvar
+                </MudButton>
+            </div>
+        </EditForm>
+    </DialogContent>
+</MudDialog>

@@ -19,10 +19,11 @@ else if (profile is not null)
 
     <MudGrid>
         <MudItem xs="12" sm="4">
-            <MudPaper Class="pa-6" Elevation="1" Style="border-radius: 16px; text-align: center;">
+            <MudPaper Class="pa-6" Elevation="1" Style="border-radius: 16px; text-align: center; cursor: pointer;"
+                      @onclick="@(() => Nav.NavigateTo("/agendamentos"))">
                 <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Color="Color.Primary" Size="Size.Large" Class="mb-2" />
                 <MudText Typo="Typo.h6" Class="font-weight-bold">Agendamentos</MudText>
-                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">Em breve</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">Visualizar Datas</MudText>
             </MudPaper>
         </MudItem>
 

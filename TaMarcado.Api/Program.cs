@@ -22,6 +22,13 @@ using TaMarcado.Aplicacao.UseCases.Schedulings.GetSchedulingsByProfessional;
 using TaMarcado.Aplicacao.UseCases.Schedulings.ConfirmScheduling;
 using TaMarcado.Aplicacao.UseCases.Schedulings.CancelScheduling;
 using TaMarcado.Aplicacao.UseCases.Schedulings.ConcludeScheduling;
+using TaMarcado.Aplicacao.UseCases.Clients.GetClients;
+using TaMarcado.Aplicacao.UseCases.Clients.UpdateClientObservations;
+using TaMarcado.Aplicacao.UseCases.Schedulings.GetSchedulingsByClient;
+using TaMarcado.Aplicacao.UseCases.Schedulings.CancelSchedulingByClient;
+using TaMarcado.Aplicacao.UseCases.Payments.GetPaymentByScheduling;
+using TaMarcado.Aplicacao.UseCases.Payments.ConfirmPayment;
+using TaMarcado.Aplicacao.UseCases.Payments.GetClientPayment;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,6 +80,14 @@ builder.Services.AddScoped<CreateServiceHandler>();
 builder.Services.AddScoped<GetServicesHandler>();
 builder.Services.AddScoped<DeleteServicesHandler>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
+builder.Services.AddScoped<GetClientsHandler>();
+builder.Services.AddScoped<UpdateClientObservationsHandler>();
+builder.Services.AddScoped<GetSchedulingsByClientHandler>();
+builder.Services.AddScoped<CancelSchedulingByClientHandler>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<GetPaymentBySchedulingHandler>();
+builder.Services.AddScoped<ConfirmPaymentHandler>();
+builder.Services.AddScoped<GetClientPaymentHandler>();
 builder.Services.AddScoped<ISchedulingRepository, SchedulingRepository>();
 builder.Services.AddScoped<GetPublicProfileHandler>();
 builder.Services.AddScoped<GetAvailableSlotsHandler>();

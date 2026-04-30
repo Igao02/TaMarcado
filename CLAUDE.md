@@ -268,6 +268,19 @@ Result.Failure<T>(Error.Problem("Entidade.Acao", ex.Message))
 `InteractiveShell.razor` deve conter `<MudSnackbarProvider />` e `<MudDialogProvider />`.
 Sem o provider, Snackbar/Dialog não funcionam mesmo que o componente esteja no markup.
 
+### Paginação obrigatória em tabelas
+Toda `MudTable` deve incluir `<PagerContent>` com `MudTablePager`. Nunca renderize uma tabela sem paginação, independentemente do volume de dados esperado.
+
+```razor
+<MudTable Items="items" ...>
+    <HeaderContent>...</HeaderContent>
+    <RowTemplate>...</RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }" />
+    </PagerContent>
+</MudTable>
+```
+
 ---
 
 ## Soft delete obrigatório

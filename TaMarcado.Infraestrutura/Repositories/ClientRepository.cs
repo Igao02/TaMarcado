@@ -17,4 +17,20 @@ public class ClientRepository(ApplicationDbContext context) : IClientRepository
     public Task<Client?> GetByUserIdAndProfessionalIdAsync(string userId, Guid professionalId) =>
         context.Client
             .FirstOrDefaultAsync(c => c.ApplicationUserId == userId && c.ProfessionalId == professionalId);
+
+    public Task<List<Client>> GetByProfessionalIdAsync(Guid professionalId) =>
+        context.Client
+            .Where(c => c.ProfessionalId == professionalId)
+            .OrderBy(c => c.Name)
+            .ToListAsync();
+
+    public Task<Client?> GetByIdAndProfessionalIdAsync(Guid id, Guid professionalId) =>
+        context.Client
+            .FirstOrDefaultAsync(c => c.Id == id && c.ProfessionalId == professionalId);
+
+    public async Task UpdateAsync(Client client)
+    {
+        context.Client.Update(client);
+        await context.SaveChangesAsync();
+    }
 }
