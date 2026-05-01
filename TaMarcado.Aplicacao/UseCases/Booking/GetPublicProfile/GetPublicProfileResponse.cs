@@ -5,4 +5,6 @@ public record GetPublicProfileResponse(
     string ExibitionName,
     string? PhotoUrl,
     string? Bio,
-    string WhatsApp);
+    string WhatsApp,
+    string? Address,
+    string? CategoryName);

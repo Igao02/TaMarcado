@@ -28,6 +28,7 @@ public class GetAvailableSlotsHandler(
             var existingSchedulings = await schedulingRepository.GetByProfessionalIdAndDateAsync(
                 command.ProfessionalId, command.Date);
 
+            var step = TimeSpan.FromMinutes(30);
             var duration = TimeSpan.FromMinutes(service.DurationInMinutes);
             var slots = new List<TimeSlotItem>();
 
@@ -49,7 +50,7 @@ public class GetAvailableSlotsHandler(
                             current.ToString(@"hh\:mm"),
                             slotEnd.ToString(@"hh\:mm")));
 
-                    current += duration;
+                    current += step;
                 }
             }
 

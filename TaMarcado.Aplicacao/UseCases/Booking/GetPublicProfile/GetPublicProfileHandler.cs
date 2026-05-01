@@ -20,7 +20,9 @@ public class GetPublicProfileHandler(IProfessionalRepository repository)
                 professional.ExibitionName,
                 professional.PhotoUrl,
                 professional.Bio,
-                professional.WhatsApp));
+                professional.WhatsApp,
+                professional.Address,
+                professional.Category?.Name));
         }
         catch (Exception ex)
         {

@@ -29,4 +29,9 @@
     <ProjectReference Include="..\TaMarcado.Infraestrutura\TaMarcado.Infraestrutura.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Remove="wwwroot\uploads\**" />
+  </ItemGroup>
+
+
 </Project>

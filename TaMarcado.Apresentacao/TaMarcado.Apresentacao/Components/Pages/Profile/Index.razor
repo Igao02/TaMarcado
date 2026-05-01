@@ -1,0 +1,192 @@
+@page "/perfil"
+@rendermode InteractiveServer
+@inherits ProfilePageBase
+@using TaMarcado.Dominio.Enum
+@using Microsoft.AspNetCore.Components.Forms
+
+<PageTitle>Meu Perfil — TaMarcado</PageTitle>
+
+<MudGrid Justify="Justify.Center" Style="min-height: 100vh; align-items: center;">
+    <MudItem xs="12" sm="10" md="7" lg="6">
+        <MudPaper Class="pa-6 pa-sm-8" Elevation="1" Style="border-radius: 24px;">
+            <div class="text-center mb-6">
+                <MudIcon Icon="@Icons.Material.Filled.ManageAccounts" Size="Size.Large" Color="Color.Primary" Class="mb-2" />
+                <MudText Typo="Typo.h5" Class="font-weight-bold">Meu Perfil</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">
+                    Atualize suas informações exibidas para os clientes
+                </MudText>
+            </div>
+
+            @if (isPageLoading)
+            {
+                <div class="d-flex justify-center pa-8">
+                    <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+                </div>
+            }
+            else
+            {
+                @if (errorMessage is not null)
+                {
+                    <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="mb-4 rounded-xl" Dense="false">
+                        @errorMessage
+                    </MudAlert>
+                }
+
+                <EditForm Model="model" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+
+                    <div class="d-flex flex-column align-center mb-6">
+                        @if (!string.IsNullOrEmpty(photoPreview))
+                        {
+                            <MudAvatar Style="width:120px;height:120px;margin-bottom:12px;">
+                                <MudImage Src="@photoPreview" Alt="Foto de perfil" Style="width:100%;height:100%;object-fit:cover;" />
+                            </MudAvatar>
+                        }
+                        else
+                        {
+                            <MudAvatar Color="Color.Surface" Style="width:120px;height:120px;margin-bottom:12px;" Elevation="2">
+                                <MudIcon Icon="@Icons.Material.Filled.AddAPhoto" Size="Size.Large" Color="Color.Primary" />
+                            </MudAvatar>
+                        }
+
+                        <MudFileUpload T="IBrowserFile" FilesChanged="OnPhotoSelected" Accept="image/jpeg,image/png,image/webp" MaximumFileCount="1">
+                            <ActivatorContent>
+                                <MudButton Variant="Variant.Text"
+                                           Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.CloudUpload"
+                                           Disabled="isUploadingPhoto"
+                                           Size="Size.Small">
+                                    @if (isUploadingPhoto)
+                                    {
+                                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-1" Color="Color.Inherit" />
+                                        <span>Enviando...</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@(string.IsNullOrEmpty(photoPreview) ? "Adicionar foto (opcional)" : "Trocar foto")</span>
+                                    }
+                                </MudButton>
+                            </ActivatorContent>
+                        </MudFileUpload>
+
+                        @if (photoUploadError is not null)
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Error" Class="mt-1">@photoUploadError</MudText>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">JPG, PNG ou WebP · máx. 5MB</MudText>
+                        }
+                    </div>
+
+                    <MudTextField @bind-Value="model.ExibitionName"
+                                  Label="Nome de exibição"
+                                  HelperText="Nome ou nome da empresa que seus clientes verão"
+                                  Variant="Variant.Outlined"
+                                  FullWidth="true"
+                                  Class="mb-4"
+                                  For="@(() => model.ExibitionName)"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Person"
+                                  AdornmentColor="Color.Primary" />
+
+                    <MudTextField @bind-Value="model.Slug"
+                                  Label="Slug do seu link"
+                                  HelperText="tamarcado.com.br/agendar/seu-slug"
+                                  Variant="Variant.Outlined"
+                                  FullWidth="true"
+                                  Class="mb-4"
+                                  For="@(() => model.Slug)"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Link"
+                                  AdornmentColor="Color.Primary" />
+
+                    <MudSelect @bind-Value="model.CategoryId"
+                               Label="Categoria"
+                               Variant="Variant.Outlined"
+                               FullWidth="true"
+                               Class="mb-4"
+                               For="@(() => model.CategoryId)"
+                               AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var cat in categories)
+                        {
+                            <MudSelectItem Value="@((Guid?)cat.Id)">@cat.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudTextField @bind-Value="model.WhatsApp"
+                                  Label="WhatsApp"
+                                  HelperText="Com DDD, ex: 11999999999"
+                                  Variant="Variant.Outlined"
+                                  FullWidth="true"
+                                  Class="mb-4"
+                                  For="@(() => model.WhatsApp)"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Phone"
+                                  AdornmentColor="Color.Primary" />
+
+                    <MudTextField @bind-Value="model.Bio"
+                                  Label="Bio (opcional)"
+                                  HelperText="Uma breve descrição sobre você ou seu serviço"
+                                  Variant="Variant.Outlined"
+                                  FullWidth="true"
+                                  Lines="3"
+                                  Class="mb-4"
+                                  For="@(() => model.Bio)" />
+
+                    <MudTextField @bind-Value="model.Address"
+                                  Label="Endereço do estabelecimento (opcional)"
+                                  HelperText="Ex: Rua das Flores, 123 - Centro, São Paulo - SP"
+                                  Variant="Variant.Outlined"
+                                  FullWidth="true"
+                                  Class="mb-4"
+                                  For="@(() => model.Address)"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.LocationOn"
+                                  AdornmentColor="Color.Primary" />
+
+                    <MudDivider Class="my-4" />
+                    <MudText Typo="Typo.subtitle2" Class="mb-3">Chave PIX para recebimento</MudText>
+
+                    <MudSelect @bind-Value="model.KeyPixType"
+                               Label="Tipo de chave PIX"
+                               Variant="Variant.Outlined"
+                               FullWidth="true"
+                               Class="mb-4"
+                               AnchorOrigin="Origin.BottomCenter">
+                        <MudSelectItem Value="@KeyPixEnum.CPF">CPF</MudSelectItem>
+                        <MudSelectItem Value="@KeyPixEnum.CNPJ">CNPJ</MudSelectItem>
+                        <MudSelectItem Value="@KeyPixEnum.Email">E-mail</MudSelectItem>
+                        <MudSelectItem Value="@KeyPixEnum.Phone">Telefone</MudSelectItem>
+                        <MudSelectItem Value="@KeyPixEnum.Aleatory">Chave aleatória</MudSelectItem>
+                    </MudSelect>
+
+                    <MudTextField @bind-Value="model.KeyPix"
+                                  Label="Chave PIX"
+                                  Variant="Variant.Outlined"
+                                  FullWidth="true"
+                                  Class="mb-6"
+                                  For="@(() => model.KeyPix)"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Pix"
+                                  AdornmentColor="Color.Primary" />
+
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               FullWidth="true"
+                               Size="Size.Large"
+                               Disabled="isLoading || isUploadingPhoto"
+                               Class="rounded-pill text-capitalize font-weight-bold"
+                               Style="height: 48px;">
+                        @if (isLoading)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" Color="Color.Inherit" />
+                        }
+                        Salvar alterações
+                    </MudButton>
+                </EditForm>
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>

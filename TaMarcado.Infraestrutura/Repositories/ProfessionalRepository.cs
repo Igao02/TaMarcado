@@ -32,6 +32,7 @@ public class ProfessionalRepository(ApplicationDbContext context) : IProfessiona
 
     public Task<Professional?> GetBySlugAsync(string slug) =>
         context.Professional
+            .Include(p => p.Category)
             .FirstOrDefaultAsync(p => p.Slug == slug && p.Active);
 
     public Task<List<Professional>> GetAllActiveWithCategoryAsync() =>
@@ -43,4 +44,10 @@ public class ProfessionalRepository(ApplicationDbContext context) : IProfessiona
 
     public Task<Professional?> GetByIdAsync(Guid id) =>
         context.Professional.FirstOrDefaultAsync(p => p.Id == id);
+
+    public async Task UpdateAsync(Professional professional)
+    {
+        context.Professional.Update(professional);
+        await context.SaveChangesAsync();
+    }
 }

@@ -1,9 +1,9 @@
 using TaMarcado.Dominio.Enum;
 
-namespace TaMarcado.Aplicacao.UseCases.Professionals.CreateProfessional;
+namespace TaMarcado.Aplicacao.UseCases.Professionals.UpdateProfessional;
 
-public record CreateProfessionalCommand(
-    string ApplicationUserId,
+public record UpdateProfessionalCommand(
+    Guid Id,
     Guid CategoryId,
     string ExibitionName,
     string Slug,

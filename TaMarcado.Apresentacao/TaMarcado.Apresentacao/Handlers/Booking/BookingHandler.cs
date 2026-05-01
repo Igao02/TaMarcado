@@ -177,6 +177,8 @@ public class BookingHandler(IHttpClientFactory httpClientFactory)
         [JsonPropertyName("photoUrl")] public string? PhotoUrl { get; set; }
         [JsonPropertyName("bio")] public string? Bio { get; set; }
         [JsonPropertyName("whatsApp")] public string WhatsApp { get; set; } = string.Empty;
+        [JsonPropertyName("address")] public string? Address { get; set; }
+        [JsonPropertyName("categoryName")] public string? CategoryName { get; set; }
     }
 
     public class PublicServiceItem

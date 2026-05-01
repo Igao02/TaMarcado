@@ -21,6 +21,8 @@ public class GetProfessionalHandler(IProfessionalRepository repository)
                 professional.Slug,
                 professional.WhatsApp,
                 professional.Bio,
+                professional.Address,
+                string.IsNullOrEmpty(professional.PhotoUrl) ? null : professional.PhotoUrl,
                 professional.CategoryId,
                 professional.Category?.Name,
                 professional.KeyPix,
