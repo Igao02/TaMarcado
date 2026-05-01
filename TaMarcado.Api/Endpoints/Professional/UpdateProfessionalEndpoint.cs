@@ -1,27 +1,33 @@
 using Microsoft.AspNetCore.Identity;
-using TaMarcado.Api.Infrastructure;
 using TaMarcado.Api.Extensions;
-using TaMarcado.Aplicacao.UseCases.Professionals.CreateProfessional;
+using TaMarcado.Api.Infrastructure;
+using TaMarcado.Aplicacao.UseCases.Professionals.UpdateProfessional;
 using TaMarcado.Dominio.Enum;
+using TaMarcado.Dominio.Repositories;
 using TaMarcado.Infraestrutura.Data;
 
 namespace TaMarcado.Api.Endpoints.Professional;
 
-public class CreateProfessionalEndpoint : IEndpoint
+public class UpdateProfessionalEndpoint : IEndpoint
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/professional", async (
-            CreateProfessionalRequest request,
+        app.MapPut("/api/professional", async (
+            UpdateProfessionalRequest request,
             UserManager<ApplicationUser> userManager,
-            CreateProfessionalHandler handler) =>
+            IProfessionalRepository professionalRepository,
+            UpdateProfessionalHandler handler) =>
         {
             var user = await userManager.FindByEmailAsync(request.UserEmail);
             if (user is null)
                 return Results.Unauthorized();
 
-            var command = new CreateProfessionalCommand(
-                user.Id,
+            var professionalId = await professionalRepository.GetIdByUserIdAsync(user.Id);
+            if (professionalId is null)
+                return Results.NotFound();
+
+            var command = new UpdateProfessionalCommand(
+                professionalId.Value,
                 request.CategoryId,
                 request.ExibitionName,
                 request.Slug,
@@ -36,13 +42,14 @@ public class CreateProfessionalEndpoint : IEndpoint
             var result = await handler.Handle(command);
 
             return result.Match(
-                onSuccess: r => Results.Created($"/api/professional/{r.Id}", r),
+                onSuccess: r => Results.Ok(r),
                 onFailure: r => CustomResults.Problem(r));
-        });
+        })
+        .RequireAuthorization();
     }
 }
 
-public record CreateProfessionalRequest(
+public record UpdateProfessionalRequest(
     string UserEmail,
     Guid CategoryId,
     string ExibitionName,

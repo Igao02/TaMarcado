@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inherits IndexPageBase
 @using TaMarcado.Dominio.Enum
+@using Microsoft.AspNetCore.Components.Forms
 
 <PageTitle>Complete seu perfil — TaMarcado</PageTitle>
 
@@ -25,6 +26,50 @@
 
             <EditForm Model="model" OnValidSubmit="HandleSubmit">
                 <DataAnnotationsValidator />
+
+                <div class="d-flex flex-column align-center mb-6">
+                    @if (!string.IsNullOrEmpty(photoPreview))
+                    {
+                        <MudAvatar Style="width:120px;height:120px;margin-bottom:12px;">
+                            <MudImage Src="@photoPreview" Alt="Foto de perfil" Style="width:100%;height:100%;object-fit:cover;" />
+                        </MudAvatar>
+                    }
+                    else
+                    {
+                        <MudAvatar Color="Color.Surface" Style="width:120px;height:120px;margin-bottom:12px;" Elevation="2">
+                            <MudIcon Icon="@Icons.Material.Filled.AddAPhoto" Size="Size.Large" Color="Color.Primary" />
+                        </MudAvatar>
+                    }
+
+                    <MudFileUpload T="IBrowserFile" FilesChanged="OnPhotoSelected" Accept="image/jpeg,image/png,image/webp" MaximumFileCount="1">
+                        <ActivatorContent>
+                            <MudButton Variant="Variant.Text"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.CloudUpload"
+                                       Disabled="isUploadingPhoto"
+                                       Size="Size.Small">
+                                @if (isUploadingPhoto)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-1" Color="Color.Inherit" />
+                                    <span>Enviando...</span>
+                                }
+                                else
+                                {
+                                    <span>@(string.IsNullOrEmpty(photoPreview) ? "Adicionar foto (opcional)" : "Trocar foto")</span>
+                                }
+                            </MudButton>
+                        </ActivatorContent>
+                    </MudFileUpload>
+
+                    @if (photoUploadError is not null)
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Error" Class="mt-1">@photoUploadError</MudText>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">JPG, PNG ou WebP · máx. 5MB</MudText>
+                    }
+                </div>
 
                 <MudTextField @bind-Value="model.ExibitionName"
                               Label="Nome de exibição"
@@ -81,6 +126,17 @@
                               Lines="3"
                               Class="mb-4"
                               For="@(() => model.Bio)" />
+
+                <MudTextField @bind-Value="model.Address"
+                              Label="Endereço do estabelecimento (opcional)"
+                              HelperText="Ex: Rua das Flores, 123 - Centro, São Paulo - SP"
+                              Variant="Variant.Outlined"
+                              FullWidth="true"
+                              Class="mb-4"
+                              For="@(() => model.Address)"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.LocationOn"
+                              AdornmentColor="Color.Primary" />
 
                 <MudDivider Class="my-4" />
                 <MudText Typo="Typo.subtitle2" Class="mb-3">Chave PIX para recebimento</MudText>

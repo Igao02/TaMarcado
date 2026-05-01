@@ -16,6 +16,7 @@ public class Professional : Entity
     public required string Slug { get; set; }
     public string WhatsApp { get; set; } = string.Empty;
     public string? Bio { get; set; }
+    public string? Address { get; set; }
     public required string PhotoUrl { get; set; }
     public required string KeyPix { get; set; }
     public bool Active { get; set; }

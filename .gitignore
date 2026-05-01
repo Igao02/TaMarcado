@@ -365,3 +365,6 @@ FodyWeavers.xsd
 # Claude Code
 CLAUDE.md
 /TaMarcado.Api/appsettings.json
+
+# Upload de fotos (gerado em runtime)
+.uploads/

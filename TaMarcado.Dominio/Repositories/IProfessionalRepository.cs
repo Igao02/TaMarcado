@@ -12,4 +12,5 @@ public interface IProfessionalRepository
     Task<Professional?> GetBySlugAsync(string slug);
     Task<List<Professional>> GetAllActiveWithCategoryAsync();
     Task<Professional?> GetByIdAsync(Guid id);
+    Task UpdateAsync(Professional professional);
 }

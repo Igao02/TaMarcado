@@ -3,17 +3,18 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 using System.Security.Claims;
-using System.Text.RegularExpressions;
 using TaMarcado.Apresentacao.Handlers.Professional;
+using TaMarcado.Dominio.Enum;
 
-namespace TaMarcado.Apresentacao.Components.Pages.Professional;
+namespace TaMarcado.Apresentacao.Components.Pages.Profile;
 
-public class IndexPageBase : ComponentBase
+public class ProfilePageBase : ComponentBase
 {
     protected ProfessionalHandler.CreateProfileModel model = new();
     protected List<ProfessionalHandler.CategoryItem> categories = [];
     protected string? errorMessage;
     protected bool isLoading;
+    protected bool isPageLoading = true;
     protected string? photoPreview;
     protected bool isUploadingPhoto;
     protected string? photoUploadError;
@@ -28,14 +29,30 @@ public class IndexPageBase : ComponentBase
         var authState = await AuthState;
         var email = authState.User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
 
-        var existing = await ProfessionalHandler.GetMyProfile(email);
-        if (existing.Success)
+        var profileResult = await ProfessionalHandler.GetMyProfile(email);
+        if (!profileResult.Success || profileResult.Data is null)
         {
-            Nav.NavigateTo("/dashboard");
+            Nav.NavigateTo("/onboarding");
             return;
         }
 
         categories = await ProfessionalHandler.GetCategories();
+
+        var profile = profileResult.Data;
+        model.ExibitionName = profile.ExibitionName;
+        model.Slug = profile.Slug;
+        model.WhatsApp = profile.WhatsApp;
+        model.Bio = profile.Bio;
+        model.Address = profile.Address;
+        model.PhotoUrl = profile.PhotoUrl;
+        model.CategoryId = profile.CategoryId;
+        model.KeyPix = profile.KeyPix;
+        model.KeyPixType = (KeyPixEnum)profile.KeyPixType;
+
+        if (!string.IsNullOrEmpty(profile.PhotoUrl))
+            photoPreview = profile.PhotoUrl;
+
+        isPageLoading = false;
     }
 
     protected async Task OnPhotoSelected(IBrowserFile file)
@@ -64,27 +81,13 @@ public class IndexPageBase : ComponentBase
         catch
         {
             photoUploadError = "Arquivo inválido ou muito grande (máx. 5MB).";
-            photoPreview = null;
+            photoPreview = model.PhotoUrl;
         }
         finally
         {
             isUploadingPhoto = false;
             StateHasChanged();
         }
-    }
-
-    protected void GenerateSlug()
-    {
-        if (string.IsNullOrWhiteSpace(model.ExibitionName)) return;
-        if (!string.IsNullOrWhiteSpace(model.Slug)) return;
-
-        model.Slug = Regex.Replace(
-            model.ExibitionName.ToLowerInvariant()
-                .Normalize(System.Text.NormalizationForm.FormD)
-                .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
-                .Aggregate(string.Empty, (acc, c) => acc + c)
-                .Replace(" ", "-"),
-            @"[^a-z0-9-]", "");
     }
 
     protected async Task HandleSubmit()
@@ -98,20 +101,19 @@ public class IndexPageBase : ComponentBase
             var authState = await AuthState;
             var email = authState.User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
 
-            var result = await ProfessionalHandler.CreateProfile(model, email);
+            var result = await ProfessionalHandler.UpdateProfile(model, email);
 
             if (result.Success)
             {
-                Snackbar.Add("Perfil criado com sucesso!", Severity.Success, config =>
+                Snackbar.Add("Perfil atualizado com sucesso!", Severity.Success, config =>
                 {
                     config.Icon = Icons.Material.Filled.CheckCircle;
                     config.ShowCloseIcon = true;
                 });
-                Nav.NavigateTo("/");
             }
             else
             {
-                errorMessage = result.Error ?? "Erro ao criar perfil. Tente novamente.";
+                errorMessage = result.Error ?? "Erro ao atualizar perfil. Tente novamente.";
             }
         }
         catch (Exception ex) when (ex is not NavigationException)

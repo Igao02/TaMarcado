@@ -33,7 +33,7 @@ automáticas via WhatsApp, reduzindo faltas e eliminando a gestão manual de age
 |---|---|
 | `AspNetUsers` | Identity padrão (já existe) |
 | `Categorias` | Id (int), Nome |
-| `Profissionais` | Id, UserId (FK 1:1), CategoriaId (FK), NomeExibicao, Slug (unique), WhatsApp, Bio?, FotoUrl?, ChavePix?, TipoChavePix? (enum), Ativo, CriadoEm |
+| `Profissionais` | Id, UserId (FK 1:1), CategoriaId (FK), NomeExibicao, Slug (unique), WhatsApp, Bio?, Endereco?, FotoUrl?, ChavePix?, TipoChavePix? (enum), Ativo, CriadoEm |
 | `Servicos` | Id, ProfissionalId (FK), Nome, Descricao?, DuracaoMinutos, Preco, Ativo, CriadoEm |
 | `HorariosDisponiveis` | Id, ProfissionalId (FK), DiaSemana (enum), HoraInicio, HoraFim, Ativo |
 | `Bloqueios` | Id, ProfissionalId (FK), DataInicio, DataFim, Motivo? |
@@ -228,12 +228,14 @@ var email = authState.User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
 
 **UseCase** (`TaMarcado.Aplicacao/UseCases/<Feature>/<Action>/`)
 - **Sempre três arquivos, sem exceção:** `Command.cs` (record), `Handler.cs` (class), `Response.cs` (record)
-- Isso vale para delete, activate, deactivate — qualquer ação. Delete retorna `Result<DeleteXxxResponse>` com o Id confirmado, nunca `Result` sem genérico.
+- Isso vale para delete, activate, deactivate, upload — qualquer ação sem exceção.
+- Delete retorna `Result<DeleteXxxResponse>` com o Id confirmado, nunca `Result` sem genérico.
 - Namespace plural para evitar colisão com entidades: `UseCases.Professionals.*`, `UseCases.Services.*`
 - Handler recebe sempre um `Command` (nunca parâmetros avulsos como `Guid id, Guid professionalId`)
 - Handler injeta apenas `IRepository` interfaces — nunca `ApplicationDbContext` diretamente
 - Retorna `Result<TResponse>` do `TaMarcado.Compartilhado`
 - Sempre envolve o corpo em try/catch retornando `Error.Problem` em caso de exceção
+- **Toda regra de negócio fica no Handler — validações, cálculos, decisões, I/O de arquivos.** O endpoint nunca contém lógica; ele apenas traduz a requisição HTTP em um Command, chama o Handler e devolve o resultado via `result.Match`.
 
 **IRepository** (`TaMarcado.Dominio/Repositories/`)
 - Interface pura, sem dependência de infraestrutura
@@ -341,13 +343,25 @@ public Task<List<MinhaEntidade>> GetByProfessionalIdAsync(Guid professionalId) =
 - Repositórios: `ICategoryRepository`, `IProfessionalRepository`, `IServiceRepository`, `IClientRepository`, `ISchedulingRepository`, `IAvaliableTimeRepository`
 - Endpoints públicos: `GET /api/public/profile/{slug}`, `GET /api/public/services/{slug}`, `GET /api/public/available-slots/{slug}`, `POST /api/public/scheduling`, `GET /api/public/professionals`
 - Endpoints autenticados (profissional): `GET /api/schedulings`, `PUT /api/schedulings/{id}/confirm`, `PUT /api/schedulings/{id}/cancel`, `PUT /api/schedulings/{id}/conclude`
+- Clientes (`/clientes`) — profissional visualiza clientes que agendaram e pode adicionar observações
+- Repositório: `IPaymentRepository`
+- Endpoints autenticados (profissional): `GET /api/clients`, `PUT /api/clients/{id}/observations`, `PUT /api/payments/{schedulingId}/confirm`
+- Agendamentos do cliente (`/meus-agendamentos` — aba 2) — cliente vê próprios agendamentos, cancela e visualiza detalhes do PIX
+- Endpoints autenticados (cliente): `GET /api/schedulings/by-client`, `PUT /api/schedulings/{id}/cancel-by-client`, `GET /api/payments/client/{schedulingId}`
+- Pagamentos PIX — entidade `Pagamentos` criada automaticamente ao confirmar agendamento; confirmação manual pelo profissional; visualização pelo cliente
+- Notificações por email — `NotificationBackgroundService` (hosted service) + `SmtpEmailService`; dispara confirmação ao criar agendamento e lembretes 24h/1h antes
+- Endereço do profissional (`Endereco?`) — campo no cadastro/onboarding, exibido na página pública de agendamento
+- Foto do profissional (`FotoUrl`) — upload via `POST /api/professional/upload-photo`; preview imediato; exibida na página pública de agendamento; opcional
+- Edição de perfil (`/perfil`) — profissional edita todos os campos (nome, slug, categoria, WhatsApp, bio, endereço, foto, PIX) via `PUT /api/professional`
+- Endpoints autenticados (profissional): `POST /api/professional/upload-photo`, `PUT /api/professional`
 
-### Próximos passos (ordem de dependência)
+**Infraestrutura de uploads:** arquivos salvos em `TaMarcado/.uploads/photos/` (fora do projeto da API para não interferir com `dotnet watch`); servidos em `/uploads/**` via `PhysicalFileProvider` registrado no `Program.cs`.
 
-| # | Funcionalidade | Por quê antes |
+### Próximos passos
+
+| # | Funcionalidade | Observação |
 |---|---|---|
-| 1 | **Clientes** (`/clientes`) | Profissional visualiza e gerencia os clientes que agendaram com ele |
-| 2 | **Agendamentos do cliente** (`/meus-agendamentos` — expandir) | Cliente visualiza seus próprios agendamentos e pode cancelar |
-| 3 | **Pagamentos via PIX** | Geração do payload "Copia e Cola" + QR Code; confirmação manual pelo profissional |
-| 4 | **Notificações WhatsApp** | Confirmação e lembretes automáticos (integração externa) |
+| 1 | **Dashboard do profissional** | Página `/dashboard` é placeholder; mostrar próximos agendamentos, agendamentos do dia, resumo de status |
+| 2 | **Upload de comprovante PIX** | Campo `ComprovanteUrl` existe na entidade; falta UI para upload — opcional, não obrigatório |
+| 3 | **Planos e Assinaturas** | Entidades `Planos`/`Assinaturas` já existem no banco; falta UI (`/planos`) e lógica de limite de agendamentos |
 

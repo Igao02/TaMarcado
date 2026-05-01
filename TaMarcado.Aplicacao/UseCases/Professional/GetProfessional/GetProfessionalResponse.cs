@@ -8,6 +8,8 @@ public record GetProfessionalResponse(
     string Slug,
     string WhatsApp,
     string? Bio,
+    string? Address,
+    string? PhotoUrl,
     Guid CategoryId,
     string? CategoryName,
     string KeyPix,

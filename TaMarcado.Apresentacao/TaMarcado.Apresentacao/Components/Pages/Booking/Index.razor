@@ -20,27 +20,52 @@ else if (Profile is not null)
 {
     <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4 mb-8">
 
-        @* Header do profissional *@
-        <MudPaper Elevation="1" Class="pa-6 mb-4 rounded-xl">
-            <div class="d-flex align-center gap-4">
+        @* Cartão de perfil do profissional *@
+        <MudPaper Elevation="2" Class="pa-6 mb-6 rounded-xl">
+            <div class="d-flex align-start gap-5">
                 @if (!string.IsNullOrEmpty(Profile.PhotoUrl))
                 {
-                    <MudAvatar Style="width:64px;height:64px;">
+                    <MudAvatar Style="width:96px;height:96px;flex-shrink:0;">
                         <MudImage Src="@Profile.PhotoUrl" Alt="@Profile.ExibitionName" />
                     </MudAvatar>
                 }
                 else
                 {
-                    <MudAvatar Color="Color.Primary" Style="width:64px;height:64px;">
+                    <MudAvatar Color="Color.Primary" Style="width:96px;height:96px;font-size:2rem;flex-shrink:0;">
                         @Profile.ExibitionName[..1].ToUpper()
                     </MudAvatar>
                 }
-                <div>
-                    <MudText Typo="Typo.h5" Class="font-weight-bold">@Profile.ExibitionName</MudText>
+                <div style="flex:1;min-width:0;">
+                    <MudText Typo="Typo.h5" Class="font-weight-bold mb-1">@Profile.ExibitionName</MudText>
+                    @if (!string.IsNullOrEmpty(Profile.CategoryName))
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="mb-2">@Profile.CategoryName</MudChip>
+                    }
                     @if (!string.IsNullOrEmpty(Profile.Bio))
                     {
-                        <MudText Typo="Typo.body2" Class="opacity-70">@Profile.Bio</MudText>
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary mb-3">@Profile.Bio</MudText>
                     }
+                    <div class="d-flex flex-wrap gap-3 mt-1">
+                        @if (!string.IsNullOrEmpty(Profile.Address))
+                        {
+                            <div class="d-flex align-center gap-1">
+                                <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" Color="Color.Secondary" />
+                                <MudText Typo="Typo.body2" Class="mud-text-secondary">@Profile.Address</MudText>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Profile.WhatsApp))
+                        {
+                            <MudButton Variant="Variant.Text"
+                                       Color="Color.Success"
+                                       Size="Size.Small"
+                                       StartIcon="@Icons.Custom.Brands.WhatsApp"
+                                       Href="@($"https://wa.me/55{Profile.WhatsApp.Replace(" ","").Replace("-","").Replace("(","").Replace(")","")}")"
+                                       Target="_blank"
+                                       Class="pa-0">
+                                Chamar no WhatsApp
+                            </MudButton>
+                        }
+                    </div>
                 </div>
             </div>
         </MudPaper>
@@ -61,7 +86,7 @@ else if (Profile is not null)
         else
         {
             @* Passo 1: Seleção de serviço *@
-            <MudText Typo="Typo.h6" Class="font-weight-bold mb-3">1. Escolha o serviço</MudText>
+            <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-3">1. Escolha o serviço</MudText>
 
             @if (Services.Count == 0)
             {
@@ -87,7 +112,7 @@ else if (Profile is not null)
             @if (SelectedService is not null)
             {
                 @* Passo 2: Data e slot *@
-                <MudText Typo="Typo.h6" Class="font-weight-bold mb-3 mt-2">2. Escolha a data e o horário</MudText>
+                <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-3 mt-2">2. Escolha a data e o horário</MudText>
 
                 <MudPaper Elevation="1" Class="pa-4 mb-4 rounded-xl">
                     <MudDatePicker Label="Data"
@@ -120,7 +145,7 @@ else if (Profile is not null)
             @if (SelectedSlot is not null)
             {
                 @* Passo 3: Dados do cliente *@
-                <MudText Typo="Typo.h6" Class="font-weight-bold mb-3 mt-2">3. Seus dados</MudText>
+                <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-3 mt-2">3. Seus dados</MudText>
 
                 <ClientInfoForm
                     Model="BookingModel"

@@ -4,6 +4,8 @@ using System.Reflection;
 using TaMarcado.Api.Extensions;
 using TaMarcado.Aplicacao.UseCases.Professionals.CreateProfessional;
 using TaMarcado.Aplicacao.UseCases.Professionals.GetProfessional;
+using TaMarcado.Aplicacao.UseCases.Professionals.UpdateProfessional;
+using TaMarcado.Aplicacao.UseCases.Professionals.UploadPhoto;
 using TaMarcado.Aplicacao.UseCases.Category.GetCategories;
 using TaMarcado.Aplicacao.UseCases.Services.CreateService;
 using TaMarcado.Aplicacao.UseCases.Services.GetServices;
@@ -77,6 +79,8 @@ builder.Services.AddScoped<GetAvaliableTimesHandler>();
 builder.Services.AddScoped<DeleteAvaliableTimeHandler>();
 builder.Services.AddScoped<CreateProfessionalHandler>();
 builder.Services.AddScoped<GetProfessionalHandler>();
+builder.Services.AddScoped<UpdateProfessionalHandler>();
+builder.Services.AddScoped<UploadPhotoHandler>();
 builder.Services.AddScoped<GetCategoriesHandler>();
 builder.Services.AddScoped<CreateServiceHandler>();
 builder.Services.AddScoped<GetServicesHandler>();
@@ -128,6 +132,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+var uploadsRoot = Path.GetFullPath(Path.Combine(app.Environment.ContentRootPath, "..", ".uploads"));
+Directory.CreateDirectory(uploadsRoot);
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadsRoot),
+    RequestPath = "/uploads"
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 

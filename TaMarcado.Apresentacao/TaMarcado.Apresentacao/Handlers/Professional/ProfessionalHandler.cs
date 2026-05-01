@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using TaMarcado.Dominio.Enum;
@@ -21,6 +22,8 @@ public class ProfessionalHandler(IHttpClientFactory httpClientFactory)
             slug = model.Slug,
             whatsApp = model.WhatsApp,
             bio = model.Bio,
+            address = model.Address,
+            photoUrl = model.PhotoUrl,
             keyPix = model.KeyPix,
             keyPixType = (int)model.KeyPixType
         };
@@ -60,6 +63,71 @@ public class ProfessionalHandler(IHttpClientFactory httpClientFactory)
         return new ProfessionalResult<ProfileData> { Success = false, Error = "Erro ao buscar perfil." };
     }
 
+    public async Task<ProfessionalResult> UpdateProfile(CreateProfileModel model, string userEmail)
+    {
+        var client = httpClientFactory.CreateClient("ApiBack");
+
+        var request = new
+        {
+            userEmail,
+            categoryId = model.CategoryId,
+            exibitionName = model.ExibitionName,
+            slug = model.Slug,
+            whatsApp = model.WhatsApp,
+            bio = model.Bio,
+            address = model.Address,
+            photoUrl = model.PhotoUrl,
+            keyPix = model.KeyPix,
+            keyPixType = (int)model.KeyPixType
+        };
+
+        var response = await client.PutAsJsonAsync("/api/professional", request);
+
+        if (response.IsSuccessStatusCode)
+            return new ProfessionalResult { Success = true };
+
+        var content = await response.Content.ReadAsStringAsync();
+        try
+        {
+            var error = JsonSerializer.Deserialize<ErrorResponse>(content, JsonOptions);
+            return new ProfessionalResult { Success = false, Error = error?.Detail ?? "Erro ao atualizar perfil." };
+        }
+        catch
+        {
+            return new ProfessionalResult { Success = false, Error = $"Erro HTTP {(int)response.StatusCode}: {content}" };
+        }
+    }
+
+    public async Task<ProfessionalResult<string>> UploadPhotoAsync(byte[] fileBytes, string fileName, string contentType)
+    {
+        var client = httpClientFactory.CreateClient("ApiBack");
+
+        using var content = new MultipartFormDataContent();
+        var fileContent = new ByteArrayContent(fileBytes);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+        content.Add(fileContent, "photo", fileName);
+
+        var response = await client.PostAsync("/api/professional/upload-photo", content);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var json = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<UploadPhotoResponse>(json, JsonOptions);
+            return new ProfessionalResult<string> { Success = true, Data = result?.Url };
+        }
+
+        var errorContent = await response.Content.ReadAsStringAsync();
+        try
+        {
+            var error = JsonSerializer.Deserialize<ErrorResponse>(errorContent, JsonOptions);
+            return new ProfessionalResult<string> { Success = false, Error = error?.Detail ?? "Erro ao enviar foto." };
+        }
+        catch
+        {
+            return new ProfessionalResult<string> { Success = false, Error = $"Erro HTTP {(int)response.StatusCode}: {errorContent}" };
+        }
+    }
+
     public async Task<List<CategoryItem>> GetCategories()
     {
         var client = httpClientFactory.CreateClient("ApiBack");
@@ -94,6 +162,11 @@ public class ProfessionalHandler(IHttpClientFactory httpClientFactory)
         [StringLength(500, ErrorMessage = "Máximo 500 caracteres")]
         public string? Bio { get; set; }
 
+        [StringLength(300, ErrorMessage = "Máximo 300 caracteres")]
+        public string? Address { get; set; }
+
+        public string? PhotoUrl { get; set; }
+
         [Required(ErrorMessage = "A chave PIX é obrigatória")]
         public string KeyPix { get; set; } = string.Empty;
 
@@ -123,6 +196,8 @@ public class ProfessionalHandler(IHttpClientFactory httpClientFactory)
         [JsonPropertyName("slug")] public string Slug { get; set; } = string.Empty;
         [JsonPropertyName("whatsApp")] public string WhatsApp { get; set; } = string.Empty;
         [JsonPropertyName("bio")] public string? Bio { get; set; }
+        [JsonPropertyName("address")] public string? Address { get; set; }
+        [JsonPropertyName("photoUrl")] public string? PhotoUrl { get; set; }
         [JsonPropertyName("categoryId")] public Guid CategoryId { get; set; }
         [JsonPropertyName("categoryName")] public string? CategoryName { get; set; }
         [JsonPropertyName("keyPix")] public string KeyPix { get; set; } = string.Empty;
@@ -133,5 +208,10 @@ public class ProfessionalHandler(IHttpClientFactory httpClientFactory)
     private class ErrorResponse
     {
         [JsonPropertyName("detail")] public string? Detail { get; set; }
+    }
+
+    private class UploadPhotoResponse
+    {
+        [JsonPropertyName("url")] public string? Url { get; set; }
     }
 }
